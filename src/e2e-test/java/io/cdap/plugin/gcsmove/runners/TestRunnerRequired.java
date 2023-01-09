@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
   features = {"src/e2e-test/features"},
   glue = {"io.cdap.plugin.gcsmove.stepsdesign", "io.cdap.plugin.gcs.stepsdesign",
     "stepsdesign", "io.cdap.plugin.common.stepsdesign"},
-  tags = {"@Run"},
+  tags = {"@GCSMove_Required"},
   //TODO: Enable test once issue is fixed https://cdap.atlassian.net/browse/PLUGIN-1134
   monochrome = true,
   plugin = {"pretty", "html:target/cucumber-html-report/gcsmove-action-required",
