@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
   features = {"src/e2e-test/features"},
   glue = {"io.cdap.plugin.gcsdelete.stepsdesign", "io.cdap.plugin.gcs.stepsdesign", "stepsdesign",
     "io.cdap.plugin.common.stepsdesign"},
-  tags = {"@GCSDelete"},
+  tags = {"@Run"},
   monochrome = true,
   plugin = {"pretty", "html:target/cucumber-html-report/gcsdelete",
     "json:target/cucumber-reports/cucumber-gcsdelete.json",
