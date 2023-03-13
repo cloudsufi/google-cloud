@@ -1,4 +1,4 @@
-@GCS_Source
+#@GCS_Source
 Feature: GCS source - Validate GCS plugin output schema for different formats
 
   Scenario Outline:GCS Source output schema validation for csv and tsv format

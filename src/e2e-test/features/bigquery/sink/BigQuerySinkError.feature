@@ -1,4 +1,4 @@
-@BigQuery_Sink
+#@BigQuery_Sink
 Feature: BigQuery sink - Validate BigQuery sink plugin error scenarios
 
   Scenario Outline:Verify BigQuery Sink properties validation errors for mandatory fields

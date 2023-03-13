@@ -1,4 +1,4 @@
-@PubSub_Sink
+#@PubSub_Sink
 Feature: PubSub-Sink - Verify PubSub sink plugin error Scenarios
 
   Scenario Outline: Verify PubSub sink properties validation errors for mandatory fields

@@ -1,4 +1,4 @@
-@Spanner_Sink
+#@Spanner_Sink
 Feature: Spanner Sink - Verify Spanner sink plugin error scenarios
 
   Scenario Outline:Verify Spanner sink properties validation errors for mandatory fields

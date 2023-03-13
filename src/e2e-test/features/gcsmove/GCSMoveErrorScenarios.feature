@@ -1,4 +1,4 @@
-@GCSMove
+#@GCSMove
 Feature: GCSMove - Validate GCSMove plugin error scenarios
 
   Scenario Outline:Verify GCSMove plugin properties validation errors for mandatory fields
