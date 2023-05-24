@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
   glue = {"io.cdap.plugin.gcs.stepsdesign", "io.cdap.plugin.bigquery.stepsdesign",
     "stepsdesign", "io.cdap.plugin.common.stepsdesign", "io.cdap.plugin.pubsub.stepsdesign",
           "io.cdap.plugin.gcsmove.stepsdesign"},
-  tags = {"@CMEK_Required"},
+  tags = {"@Run"},
   plugin = {"pretty", "html:target/cucumber-html-report/cmek-required",
     "json:target/cucumber-reports/cucumber-cmek-required.json",
     "junit:target/cucumber-reports/cucumber-cmek-required.xml",
