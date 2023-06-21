@@ -16,6 +16,7 @@
 package io.cdap.plugin.gcs.stepsdesign;
 
 import io.cdap.e2e.pages.actions.CdfGcsActions;
+import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
 import io.cdap.e2e.pages.locators.CdfGCSLocators;
 import io.cdap.e2e.pages.locators.CdfStudioLocators;
 import io.cdap.e2e.utils.ElementHelper;
@@ -29,6 +30,8 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 
 /**
@@ -48,7 +51,7 @@ public class GCSSource implements E2EHelper {
 
   @Then("Enter GCS source property path {string}")
   public void enterGCSSourcePropertyPath(String path) {
-    CdfGcsActions.getGcsBucket("gs://" + TestSetupHooks.gcsSourceBucketName + "/"
+    CdfGcsActions.getGcsBucket("gs://" + TestSetupHooks.gcsSourceBucketName+"/"
                                  + PluginPropertyUtils.pluginProp(path));
   }
 
@@ -127,5 +130,22 @@ public class GCSSource implements E2EHelper {
   @Then("Select GCS source property path filename only as {string}")
   public void selectGCSSourcePropertyPathFilenameOnlyAs(String value) {
     CdfGcsActions.selectPathFilenameOnly(value);
+  }
+
+
+  @Then("Read Credentials file {string} with value: {string}")
+  public void readCredentialsFileWithValue(String pluginProperty, String keys) throws IOException {
+    FileReader file = new FileReader("C:/Users/ishak/Downloads/google-cloud/src/e2e-test/resources/credentials");
+    BufferedReader reader = new BufferedReader(file);
+    String key = "";
+    String line = reader.readLine();
+
+    while (line != null) {
+      key += line;
+      line = reader.readLine();
+    }
+
+    CdfPluginPropertiesActions.enterValueInInputProperty(pluginProperty, key);
+
   }
 }

@@ -89,6 +89,7 @@ public class BigQuerySource implements E2EHelper {
     CdfBigQueryPropertiesActions.enterProjectId(PluginPropertyUtils.pluginProp("projectId"));
     CdfBigQueryPropertiesActions.enterDatasetProjectId(PluginPropertyUtils.pluginProp("projectId"));
     CdfBigQueryPropertiesActions.enterBigQueryDataset(PluginPropertyUtils.pluginProp("dataset"));
+    CdfBigQueryPropertiesActions.enterBigQueryTable(PluginPropertyUtils.pluginProp("table"));
     CdfBigQueryPropertiesActions.enterBigQueryTable(TestSetupHooks.bqSourceTable);
     if (property.equalsIgnoreCase("dataset")) {
       SeleniumHelper.replaceElementValue(CdfBigQueryPropertiesLocators.bigQueryDataSet,
