@@ -177,3 +177,137 @@ Feature: GCS source - Verification of GCS to BQ successful data transfer
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
     Then Get count of no of records transferred to target BigQuery Table
+
+  @GCS_CSV_TEST @BQ_SINK_TEST
+  Scenario: To verify Successful GCS to BigQuery data transfer with sample size field
+    Given Open Datafusion Project to configure pipeline
+    When Source is GCS
+    When Sink is BigQuery
+    Then Connect source as "GCS" and sink as "BigQuery" to establish connection
+    Then Open GCS source properties
+    Then Enter GCS property projectId and reference name
+    Then Select radio button plugin property: "serviceAccountType" with value: "JSON"
+    Then Read Credentials file "serviceAccountJSON" with value: "keys"
+#    Then Override Service account details if set in environment variables
+    Then Enter GCS source property path "gcsCsvFile"
+#    Then Enter GCS source property path "gcsBucketName"
+    Then Select GCS property format "csv"
+    Then Enter input plugin property: "sampleSize" with value: "gcsSampleSize"
+    Then Toggle GCS source property skip header to true
+#    Then Validate output schema with expectedSchema "gcsCsvFileSchema1"
+    Then Validate output schema with expectedSchema "gcsCsvFileSchema"
+    Then Validate "GCS" plugin properties
+    Then Close the GCS properties
+    Then Open BigQuery sink properties
+    Then Select radio button plugin property: "serviceAccountType" with value: "JSON"
+    Then Read Credentials file "serviceAccountJSON" with value: "keys"
+#    Then Override Service account details if set in environment variables
+    Then Enter the BigQuery sink mandatory properties
+ #   Then Enter input plugin property: "table" with value: "bqTable"    DELETE FROM PP
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Save and Deploy Pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+    Then Get count of no of records transferred to target BigQuery Table
+
+  @GCS_CSV_TEST @BQ_SINK_TEST
+  Scenario: To verify Successful GCS to BigQuery data transfer with with enable quoted values true
+    Given Open Datafusion Project to configure pipeline
+    When Source is GCS
+    When Sink is BigQuery
+    Then Connect source as "GCS" and sink as "BigQuery" to establish connection
+    Then Open GCS source properties
+    Then Enter GCS property projectId and reference name
+    Then Select radio button plugin property: "serviceAccountType" with value: "JSON"
+    Then Read Credentials file "serviceAccountJSON" with value: "keys"
+#    Then Override Service account details if set in environment variables
+    Then Enter GCS source property path "gcsCsvFile"
+    Then Select GCS property format "csv"
+    Then Toggle GCS source property skip header to true
+    Then Click plugin property: "switch-enableQuotedValues"
+#    Then Validate output schema with expectedSchema "gcsCsvFileSchema1"
+    Then Validate output schema with expectedSchema "gcsCsvFileSchema"
+    Then Validate "GCS" plugin properties
+    Then Close the GCS properties
+    Then Open BigQuery sink properties
+    Then Select radio button plugin property: "serviceAccountType" with value: "JSON"
+    Then Read Credentials file "serviceAccountJSON" with value: "keys"
+#    Then Override Service account details if set in environment variables
+    Then Enter the BigQuery sink mandatory properties
+#    Then Enter input plugin property: "table" with value: "bqTable"
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Save and Deploy Pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+    Then Get count of no of records transferred to target BigQuery Table
+
+  @GCS_CSV_TEST @BQ_SINK_TEST
+  Scenario: To verify Successful GCS to BigQuery data transfer with allow empty input true
+    Given Open Datafusion Project to configure pipeline
+    When Source is GCS
+    When Sink is BigQuery
+    Then Connect source as "GCS" and sink as "BigQuery" to establish connection
+    Then Open GCS source properties
+    Then Enter GCS property projectId and reference name
+    Then Select radio button plugin property: "serviceAccountType" with value: "JSON"
+    Then Read Credentials file "serviceAccountJSON" with value: "keys"
+#    Then Override Service account details if set in environment variables
+    Then Enter GCS source property path "gcsCsvFile"
+    Then Select GCS property format "csv"
+    Then Toggle GCS source property skip header to true
+    Then Select radio button plugin property: "ignoreNonExistingFolders" with value: "true"
+    Then Validate output schema with expectedSchema "gcsCsvFileSchema"
+    Then Validate "GCS" plugin properties
+    Then Close the GCS properties
+    Then Open BigQuery sink properties
+    Then Select radio button plugin property: "serviceAccountType" with value: "JSON"
+    Then Read Credentials file "serviceAccountJSON" with value: "keys"
+#    Then Override Service account details if set in environment variables
+    Then Enter the BigQuery sink mandatory properties
+ #   Then Enter input plugin property: "table" with value: "bqTable"
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Save and Deploy Pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+    Then Get count of no of records transferred to target BigQuery Table
+
+  Scenario: To verify Successful GCS to BigQuery data transfer with Data File Encrypted true
+    Given Open Datafusion Project to configure pipeline
+    When Source is GCS
+    When Sink is BigQuery
+    Then Connect source as "GCS" and sink as "BigQuery" to establish connection
+    Then Open GCS source properties
+    Then Enter GCS property projectId and reference name
+    Then Select radio button plugin property: "serviceAccountType" with value: "JSON"
+    Then Read Credentials file "serviceAccountJSON" with value: "keys"
+#    Then Override Service account details if set in environment variables
+    Then Enter GCS source property path "gcsBucketNameEncrypted"
+    Then Select GCS property format "csv"
+    Then Toggle GCS source property skip header to true
+    Then Select radio button plugin property: "encrypted" with value: "true"
+    Then Validate output schema with expectedSchema "gcsCsvFileSchema1"
+    Then Validate "GCS" plugin properties
+    Then Close the GCS properties
+    Then Open BigQuery sink properties
+    Then Select radio button plugin property: "serviceAccountType" with value: "JSON"
+    Then Read Credentials file "serviceAccountJSON" with value: "keys"
+#    Then Override Service account details if set in environment variables
+    Then Enter the BigQuery sink mandatory properties
+    Then Enter input plugin property: "table" with value: "bqTable"
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Save and Deploy Pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+    Then Get count of no of records transferred to target BigQuery Table
