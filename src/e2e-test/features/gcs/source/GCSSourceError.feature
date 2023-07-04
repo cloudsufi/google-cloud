@@ -72,7 +72,6 @@ Feature: GCS source - Verify GCS Source plugin error scenarios
     Then Enter GCS property projectId and reference name
     Then Override Service account details if set in environment variables
     Then Enter GCS source property path "gcsCsvFile"
-#    Then Enter GCS property path "gcsBucketName"
     Then Select GCS property format "csv"
     Then Toggle GCS source property skip header to true
     Then Enter GCS source property minimum split size "gcsMinSplitSize" and maximum split size "gcsInvalidMinSplitSize"
@@ -87,7 +86,6 @@ Feature: GCS source - Verify GCS Source plugin error scenarios
     Then Enter GCS property projectId and reference name
     Then Override Service account details if set in environment variables
     Then Enter GCS source property path "gcsCsvFile"
-#    Then Enter GCS property path "gcsBucketName"
     Then Select GCS property format "csv"
     Then Toggle GCS source property skip header to true
     Then Enter GCS source property minimum split size "gcsInvalidMaxSplitSize" and maximum split size "gcsMaxSplitSize"
@@ -102,7 +100,6 @@ Feature: GCS source - Verify GCS Source plugin error scenarios
     Then Enter GCS property projectId and reference name
     Then Override Service account details if set in environment variables
     Then Enter GCS source property path "gcsCsvFile"
-#    Then Enter GCS property path "gcsBucketName"
     Then Select GCS property format "csv"
     Then Toggle GCS source property skip header to true
     Then Enter input plugin property: "fileRegex" with value: "gcsInvalidRegexPathFilter"
@@ -117,7 +114,6 @@ Feature: GCS source - Verify GCS Source plugin error scenarios
     Then Enter GCS property projectId and reference name
     Then Override Service account details if set in environment variables
     Then Enter GCS source property path "gcsCsvFile"
- #   Then Enter GCS property path "gcsBucketName"
     Then Select GCS property format "csv"
     Then Toggle GCS source property skip header to true
     Then Enter textarea plugin property: "fileSystemProperties" with value: "gcsInvalidFileSysProperty"
@@ -132,7 +128,6 @@ Feature: GCS source - Verify GCS Source plugin error scenarios
     Then Enter GCS property projectId and reference name
     Then Override Service account details if set in environment variables
     Then Enter GCS source property path "gcsCsvFile"
-#    Then Enter GCS property path "gcsBucketName"    DELETE GCSBUCKETNAME FROM PLUGINPROPERTIES
     Then Select GCS property format "csv"
     Then Toggle GCS source property skip header to true
     Then Enter input plugin property: "referenceName" with value: "gcsInvalidRefName"

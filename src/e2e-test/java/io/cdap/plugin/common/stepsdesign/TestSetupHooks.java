@@ -68,11 +68,6 @@ public class TestSetupHooks {
   public static String spannerTargetTable = StringUtils.EMPTY;
   public static boolean firstSpannerTestFlag = true;
 
-//  public static void main(String[] args) throws IOException, InterruptedException {
-//    createSourceBQTableWithDifferentDataTypes();
-//    setTempTargetGCSBucketName();
-//  }
-
   @Before(order = 1)
   public static void overrideServiceAccountFilePathIfProvided() {
     if (beforeAllFlag) {
@@ -355,7 +350,8 @@ public class TestSetupHooks {
     try {
       BigQueryClient.getSoleQueryResult(insertDataQuery);
     } catch (NoSuchElementException e) {
-      e.printStackTrace();
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
     }
     PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " created successfully");
