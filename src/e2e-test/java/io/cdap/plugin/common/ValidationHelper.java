@@ -28,6 +28,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import io.cdap.e2e.utils.BigQueryClient;
 import io.cdap.e2e.utils.PluginPropertyUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -52,48 +54,38 @@ import java.util.stream.StreamSupport;
  * Validation Helper.
  */
 public class ValidationHelper {
-  private static final String PROJECT_ID = PluginPropertyUtils.pluginProp("projectId");
+  private static String projectId = PluginPropertyUtils.pluginProp("projectId");
   private static final Gson gson = new Gson();
+
+  private static final Logger LOG = LoggerFactory.getLogger(ValidationHelper.class);
 
   public static boolean validateBQDataToGCS(String table, String bucketName) throws IOException,
     InterruptedException {
-    Map<String, JsonObject> expectedData = new HashMap<>();
-    Map<String, JsonObject> actualData = listBucketObjects(bucketName);
+    Map<String, JsonObject> bigQueryData = new HashMap<>();
+    Map<String, JsonObject> gcsData = listBucketObjects(bucketName);
 
-    getBigQueryTableData(table, expectedData);
+    getBigQueryTableData(table, bigQueryData);
 
-    boolean isMatched = matchJsonMaps(expectedData, actualData);
-
-    if (isMatched) {
-      System.out.println("The data is matched.");
-    } else {
-      System.out.println("The data is not matched.");
-    }
+    boolean isMatched = compareData(bigQueryData, gcsData);
 
     return isMatched;
   }
 
   public static boolean validateGCSDataToBQ(String bucketName, String table) throws IOException,
     InterruptedException {
-    Map<String, JsonObject> expectedData = new HashMap<>();
-    Map<String, JsonObject> actualData = listBucketObjects(bucketName);
+    Map<String, JsonObject> bigQueryData = new HashMap<>();
+    Map<String, JsonObject> gcsData = listBucketObjects(bucketName);
 
-    getBigQueryTableData(table, expectedData);
+    getBigQueryTableData(table, bigQueryData);
 
-    boolean isMatched = matchJsonMaps(expectedData, actualData);
-
-    if (isMatched) {
-      System.out.println("The data is matched.");
-    } else {
-      System.out.println("The data is not matched.");
-    }
+    boolean isMatched = compareData(bigQueryData, gcsData);
 
     return isMatched;
   }
 
   public static Map<String, JsonObject> listBucketObjects(String bucketName) {
-    Map<String, JsonObject> dataMap = new HashMap<>();
-    Storage storage = StorageOptions.newBuilder().setProjectId(PROJECT_ID).build().getService();
+    Map<String, JsonObject> bucketObjectData = new HashMap<>();
+    Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
     Page<Blob> blobs = storage.list(bucketName);
 
     List<Blob> bucketObjects = StreamSupport.stream(blobs.iterateAll().spliterator(), true)
@@ -106,12 +98,12 @@ public class ValidationHelper {
     if (!bucketObjectNames.isEmpty()) {
       String objectName = bucketObjectNames.get(0);
       if (objectName.contains("part-r")) {
-        Map<String, JsonObject> dataMap2 = fetchObjectData(PROJECT_ID, bucketName, objectName);
-        dataMap.putAll(dataMap2);
+        Map<String, JsonObject> dataMap2 = fetchObjectData(projectId, bucketName, objectName);
+        bucketObjectData.putAll(dataMap2);
       }
     }
 
-    return dataMap;
+    return bucketObjectData;
   }
 
   private static Map<String, JsonObject> fetchObjectData(String projectId, String bucketName, String objectName) {
@@ -134,7 +126,6 @@ public class ValidationHelper {
   private static void getBigQueryTableData(String table, Map<String, JsonObject> bigQueryRows)
     throws IOException, InterruptedException {
 
-    String projectId = PluginPropertyUtils.pluginProp("projectId");
     String dataset = PluginPropertyUtils.pluginProp("dataset");
     String selectQuery = "SELECT TO_JSON(t) FROM `" + projectId + "." + dataset + "." + table + "` AS t";
     TableResult result = BigQueryClient.getQueryResult(selectQuery);
@@ -145,12 +136,12 @@ public class ValidationHelper {
         String id = idElement.getAsString(); // Replace "id" with the actual key in the JSON
         bigQueryRows.put(id, json);
       } else {
-        System.out.println("Data Mismatched");
+        LOG.error("Data Mismatched");
       }
     }
   }
 
-  private static boolean matchJsonMaps(Map<String, JsonObject> map1, Map<String, JsonObject> map2) {
+  private static boolean compareData(Map<String, JsonObject> map1, Map<String, JsonObject> map2) {
     if (!map1.keySet().equals(map2.keySet())) {
       return false;
     }
@@ -158,9 +149,10 @@ public class ValidationHelper {
       JsonObject json1 = map1.get(key);
       JsonObject json2 = map2.get(key);
       if (!validateJsonElement(json1, json2)) {
-        return false;
+        LOG.error("Data Mismatched");
       }
-    } return true;
+    }
+    return true;
   }
 
   public static boolean validateJsonArray(JsonArray v1, JsonArray v2) {
@@ -223,6 +215,7 @@ public class ValidationHelper {
     JsonPrimitive p2 = v2.getAsJsonPrimitive();
 
     if (p1.isString() && p2.isNumber()) {
+      System.out.println("String number comparison" + p1 + p2);
       String s1 = p1.getAsString();
       long s2 = p2.getAsLong();
 
@@ -265,7 +258,7 @@ public class ValidationHelper {
   public static boolean validateByteArray(JsonPrimitive v1, JsonArray v2) {
     if (!v1.isString()) {
       return false;
-  }
+    }
     String s1 = v1.getAsString();
     byte[] bytes = new byte[v2.size()];
     for (int i = 0; i < v2.size(); i++) {
