@@ -205,6 +205,7 @@ Feature: GCS source - Verification of GCS to BQ successful data transfer
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
     Then Get count of no of records transferred to target BigQuery Table
+    Then Validate the values of records transferred from GCS bucket file is equal to the values of target BigQuery table
 
   @GCS_CSV_TEST @BQ_SINK_TEST
   Scenario: To verify Successful GCS to BigQuery data transfer with with enable quoted values true
@@ -233,6 +234,7 @@ Feature: GCS source - Verification of GCS to BQ successful data transfer
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
     Then Get count of no of records transferred to target BigQuery Table
+    Then Validate the values of records transferred from GCS bucket file is equal to the values of target BigQuery table
 
   @GCS_CSV_TEST @BQ_SINK_TEST
   Scenario: To verify Successful GCS to BigQuery data transfer with allow empty input true

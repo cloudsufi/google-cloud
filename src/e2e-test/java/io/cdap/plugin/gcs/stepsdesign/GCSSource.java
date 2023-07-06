@@ -48,7 +48,7 @@ public class GCSSource implements E2EHelper {
 
   @Then("Enter GCS source property path {string}")
   public void enterGCSSourcePropertyPath(String path) {
-    CdfGcsActions.getGcsBucket("gs://" + TestSetupHooks.gcsSourceBucketName +"/"
+    CdfGcsActions.getGcsBucket("gs://" + TestSetupHooks.gcsSourceBucketName + "/"
                                  + PluginPropertyUtils.pluginProp(path));
   }
 

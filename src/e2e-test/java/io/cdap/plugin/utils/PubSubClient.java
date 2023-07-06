@@ -55,5 +55,4 @@ public class PubSubClient {
   public static String getTopicCmekKey(String topicId) throws IOException {
     return getTopic(topicId).getKmsKeyName();
   }
-
 }
