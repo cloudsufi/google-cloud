@@ -219,3 +219,44 @@ Feature: BigQuery source - Verification of BigQuery to BigQuery successful data 
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
     Then Validate records transferred to target table is equal to number of records from source table
+
+  @BQ_SOURCE_TEST @BQ_SOURCE_VIEW_TEST @BQ_SINK_TEST
+  Scenario:Validate successful records transfer from BigQuery to BigQuery by enable querying views
+    Given Open Datafusion Project to configure pipeline
+    When Source is BigQuery
+    When Sink is BigQuery
+    Then Open BigQuery source properties
+    Then Enter BigQuery property reference name
+    Then Enter BigQuery property projectId "projectId"
+    Then Enter BigQuery property datasetProjectId "projectId"
+    Then Override Service account details if set in environment variables
+    Then Enter BigQuery property dataset "dataset"
+    Then Enter BigQuery source property table name
+    Then Validate output schema with expectedSchema "bqSourceSchemaDatatype"
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Open BigQuery sink properties
+    Then Enter BigQuery property reference name
+    Then Enter BigQuery property projectId "projectId"
+    Then Enter BigQuery property datasetProjectId "projectId"
+    Then Override Service account details if set in environment variables
+    Then Enter BigQuery property dataset "dataset"
+    Then Enter BigQuery sink property table name
+    Then Toggle BigQuery sink property truncateTable to true
+    Then Toggle BigQuery sink property updateTableSchema to true
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Connect source as "BigQuery" and sink as "BigQuery" to establish connection
+    Then Save the pipeine
+    Then Preview and run the pipeline
+    Then Wait till pipeline preview is in running state
+    Then Open and capture pipeline preview logs
+    Then Verify the preview run status of pipeline in the logs is "succeeded"
+    Then Close the pipeline logs
+    Then Close the preview
+    Then Deploy the pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+    Then Validate records transferred to target table is equal to number of records from source table

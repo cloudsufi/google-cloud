@@ -166,3 +166,6 @@ Feature: BigQuery sink - Verification of GCS to BigQuery successful data transfe
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
     Then Get count of no of records transferred to target BigQuery Table
+
+  @BQ_SOURCE_TEST @BQ_SINK_TEST
+  Scenario:Validate successful records transfer from GCS to BigQuery with partition type TIME

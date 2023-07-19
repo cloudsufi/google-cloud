@@ -39,6 +39,12 @@ public class BigQuerySink implements E2EHelper {
     selectSinkPlugin("BigQueryTable");
   }
 
+  @When("Sink is BiqQuery Multi Table")
+  public void sinkIsBigQueryMultiTable() {
+    CdfStudioActions.expandPluginGroupIfNotAlreadyExpanded("Sink");
+    selectSinkPlugin("BigQueryMultiTable");
+  }
+
   @Then("Open BigQuery sink properties")
   public void openBigQuerySinkProperties() {
     openSinkPluginProperties("BigQuery");
