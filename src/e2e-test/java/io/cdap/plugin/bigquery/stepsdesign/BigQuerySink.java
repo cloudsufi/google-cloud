@@ -50,6 +50,11 @@ public class BigQuerySink implements E2EHelper {
     openSinkPluginProperties("BigQuery");
   }
 
+  @Then("Open BiqQueryMultiTable sink properties")
+  public void openBigQueryMultiTableSinkProperties() {
+    openSinkPluginProperties("BigQueryMultiTable");
+  }
+
   @Then("Enter BigQuery sink property table name")
   public void enterBigQuerySinkPropertyTableName() {
     CdfBigQueryPropertiesActions.enterBigQueryTable(TestSetupHooks.bqTargetTable);

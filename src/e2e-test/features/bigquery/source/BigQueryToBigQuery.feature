@@ -12,7 +12,10 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-@BQ_SOURCE_TEST @BQ_SINK_TEST
+@BigQuery_Source
+Feature: BigQuery source - Verification of BigQuery to BigQuery successful data transfer.
+
+  @BQ_SOURCE_TEST @BQ_SINK_TEST
   Scenario:Validate successful records transfer from BigQuery to BigQuery with filter
     Given Open Datafusion Project to configure pipeline
     When Source is BigQuery
@@ -258,7 +261,7 @@
     Then Validate "BigQuery" plugin properties
     Then Close the BigQuery properties
     Then Connect source as "BigQuery" and sink as "BigQuery" to establish connection
-    Then Save the pipeine
+    Then Save the pipeline
     Then Preview and run the pipeline
     Then Wait till pipeline preview is in running state
     Then Open and capture pipeline preview logs

@@ -163,6 +163,19 @@ public class BigQueryBase implements E2EHelper {
     }
   }
 
+  @Then("Enter the BigQueryMultiTable properties with blank property {string}")
+  public void enterTheBigQueryMultiTablePropertiesWithBlankProperty(String property) {
+    if (!property.equalsIgnoreCase("referenceName")) {
+      CdfBigQueryPropertiesActions.enterBigQueryReferenceName("BQ_" + UUID.randomUUID());
+    }
+    if (!property.equalsIgnoreCase("dataset")) {
+      CdfBigQueryPropertiesActions.enterBigQueryDataset(PluginPropertyUtils.pluginProp("dataset"));
+    }
+    if (!PluginPropertyUtils.pluginProp("bqMandatoryProperties").contains(property)) {
+      Assert.fail("Invalid BigQuery mandatory property " + property);
+    }
+  }
+
   @Then("Validate the cmek key {string} of target BigQuery table if cmek is enabled")
   public void validateTheCmekKeyOfTargetBigQueryTableIfCmekIsEnabled(String cmek) throws IOException {
     String cmekBQ = PluginPropertyUtils.pluginProp(cmek);
