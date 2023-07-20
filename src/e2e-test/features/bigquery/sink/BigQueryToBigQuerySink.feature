@@ -30,8 +30,6 @@ Then Enter BigQuery source property table name
 Then Validate output schema with expectedSchema "bqSourceSchemaDatatype"
 Then Validate "BigQuery" plugin properties
 Then Close the BigQuery properties
-Then Validate "BigQuery" plugin properties
-Then Close the BigQuery properties
 Then Open BigQuery sink properties
 Then Enter BigQuery property reference name
 Then Enter BigQuery property projectId "projectId"

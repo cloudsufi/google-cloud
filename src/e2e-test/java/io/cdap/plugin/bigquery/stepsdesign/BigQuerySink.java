@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 Cask Data, Inc.
+ * Copyright © 2023 Cask Data, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +16,7 @@
 package io.cdap.plugin.bigquery.stepsdesign;
 
 import io.cdap.e2e.pages.actions.CdfBigQueryPropertiesActions;
+import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
 import io.cdap.e2e.pages.actions.CdfStudioActions;
 import io.cdap.e2e.pages.locators.CdfStudioLocators;
 import io.cdap.e2e.utils.ElementHelper;
@@ -24,6 +25,9 @@ import io.cdap.plugin.common.stepsdesign.TestSetupHooks;
 import io.cdap.plugin.utils.E2EHelper;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.cdap.plugin.bigquerymultitable.actions.BQMTActions;
+import io.cdap.plugin.utils.E2EHelper;
+import io.cdap.plugin.utils.E2ETestConstants;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -43,6 +47,91 @@ public class BigQuerySink implements E2EHelper {
   public void sinkIsBigQueryMultiTable() {
     CdfStudioActions.expandPluginGroupIfNotAlreadyExpanded("Sink");
     selectSinkPlugin("BigQueryMultiTable");
+  }
+
+  @Then("Open the BiqQueryMultiTable sink properties")
+  public void openTheBigQueryMultiTableSinkProperties() {
+    openSinkPluginProperties("BigQueryMultiTable");
+  }
+
+  @Then("Enter BiqQueryMultiTable sink property projectId {string}")
+  public void enterBigQueryMultiTableSinkPropertyProjectId(String projectId) {
+    BQMTActions.enterProjectID(PluginPropertyUtils.pluginProp(projectId));
+  }
+
+  @Then("Enter BiqQueryMultiTable sink property reference name")
+  public void enterBigQueryMultiTableSinkPropertyReferenceName() {
+    BQMTActions.enterBQMTReferenceName();
+  }
+
+  @Then("Enter BiqQueryMultiTable sink property dataset {string}")
+  public void enterBigQueryMultiTableSinkPropertyDataset(String dataset) {
+    BQMTActions.enterBQMTDataset(PluginPropertyUtils.pluginProp(dataset));
+  }
+
+  @Then("Close the BiqQueryMultiTable properties")
+  public void closeTheBigQueryMultiTableProperties() {
+    BQMTActions.close();
+  }
+
+  @Then("Enter BigQueryMultiTable sink property {string} as macro argument {string}")
+  public void enterBigQueryMultiTableSinkPropertyAsMacroArgument(String pluginProperty, String macroArgument) {
+    enterPropertyAsMacroArgument(pluginProperty, macroArgument);
+  }
+
+  @Then("Toggle BiqQueryMultiTable sink property truncateTable to {string}")
+  public void toggleBigQueryMultiTableSinkPropertyTruncateTableTo(String toggle) {
+    if(toggle.equalsIgnoreCase("True")){
+      BQMTActions.clickTruncateTableSwitch();
+    }
+  }
+
+  @Then("Toggle BiqQueryMultiTable sink property allow flexible schema to {string}")
+  public void toggleBigQueryMultiTableSinkPropertyAllowFlexibleSchemaTo(String toggle) {
+    if(toggle.equalsIgnoreCase("True")){
+      BQMTActions.clickAllowFlexibleSchemaSwitch();
+    }
+  }
+
+  @Then("Enter BiqQueryMultiTable sink property reference name {string}")
+  public void enterBigQueryMultiTableSinkPropertyReferenceName(String reference) {
+    BQMTActions.enterReferenceName(PluginPropertyUtils.pluginProp(reference));
+  }
+
+  @Then("Select BiqQueryMultiTable sink property update table schema as {string}")
+  public void selectBigQueryMultiTableSinkPropertyUpdateTableSchemaAs(String updateTableSchema) {
+    BQMTActions.selectUpdateTableSchema(updateTableSchema);
+  }
+
+  @Then("Enter BiqQueryMultiTable sink property GCS upload request chunk size {string}")
+  public void enterBigQueryMultiTableSinkPropertyGCSUploadRequestChunkSize(String chunkSize) {
+    BQMTActions.enterChunkSize(PluginPropertyUtils.pluginProp(chunkSize));
+  }
+
+  @Then("Verify the BiqQueryMultiTable sink validation error message for invalid property {string}")
+  public void verifyTheBigQueryMultiTableSinkValidationErrorMessageForInvalidProperty(String property) {
+    CdfPluginPropertiesActions.clickValidateButton();
+    String expectedErrorMessage;
+    if (property.equalsIgnoreCase("gcsChunkSize")) {
+      expectedErrorMessage = PluginPropertyUtils
+        .errorProp(E2ETestConstants.ERROR_MSG_BQMT_INCORRECT_CHUNKSIZE);
+    } else if (property.equalsIgnoreCase("bucket")) {
+      expectedErrorMessage = PluginPropertyUtils
+        .errorProp(E2ETestConstants.ERROR_MSG_BQMT_INCORRECT_TEMPORARY_BUCKET);
+    } else if (property.equalsIgnoreCase("dataset")) {
+      expectedErrorMessage = PluginPropertyUtils
+        .errorProp(E2ETestConstants.ERROR_MSG_BQMT_INCORRECT_DATASET);
+    } else {
+      expectedErrorMessage = PluginPropertyUtils.errorProp(E2ETestConstants.ERROR_MSG_BQMT_INCORRECT_REFERENCENAME).
+        replace("REFERENCE_NAME", PluginPropertyUtils.pluginProp("bqmtInvalidSinkReferenceName"));
+    }
+    CdfPluginPropertiesActions.verifyPluginPropertyInlineErrorMessage(property, expectedErrorMessage);
+    CdfPluginPropertiesActions.verifyPluginPropertyInlineErrorMessageColor(property);
+  }
+
+  @Then("Enter BiqQueryMultiTable sink property temporary bucket name {string}")
+  public void enterBigQueryMultiTableSinkPropertyTemporaryBucketName(String temporaryBucket) throws IOException {
+    BQMTActions.enterTemporaryBucketName(PluginPropertyUtils.pluginProp(temporaryBucket));
   }
 
   @Then("Open BigQuery sink properties")
