@@ -1,7 +1,7 @@
 @BQExecute
 Feature: BigQueryExecute - Verify data transfer using BigQuery Execute plugin
 
-  @BQ_SOURCE_TEST @BQ_SINK_TEST @BQ_EXECUTE_SQL @BQExecute_Required
+  @BQ_SOURCE_TEST @BQ_SINK_TEST @BQ_EXECUTE_SQL
   Scenario: Verify Store results in a BigQuery Table functionality of BQExecute plugin
     Given Open Datafusion Project to configure pipeline
     When Expand Plugin group in the LHS plugins list: "Conditions and Actions"
