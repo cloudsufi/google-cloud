@@ -95,6 +95,32 @@ Feature: GCS source - Verification of GCS to BQ successful data transfer
     Then Get count of no of records transferred to target BigQuery Table
     Then Verify datatype of field "gcsOverrideField" is overridden to data type "gcsOverrideFloatDataType" in target BigQuery table
 
+  @GCS_OUTPUT_FIELD_TEST @BQ_SINK_TEST @GCS_Source_Required
+  Scenario: To verify Successful GCS to Trash data transfer with Datatype override
+    Given Open Datafusion Project to configure pipeline
+    When Source is GCS
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    When Select plugin: "Trash" from the plugins list as: "Sink"
+    Then Connect source as "GCS" and sink as "Trash" to establish connection
+    Then Open GCS source properties
+    Then Enter GCS property projectId and reference name
+    Then Override Service account details if set in environment variables
+    Then Enter GCS source property path "gcsOutputFieldTestFile"
+    Then Select GCS property format "csv"
+    Then Enter GCS source property override field "gcsOverrideField" and data type "gcsOverrideFloatDataType"
+    Then Toggle GCS source property skip header to true
+    Then Validate output schema with expectedSchema "gcsOverrideSchema"
+    Then Validate "GCS" plugin properties
+    Then Close the GCS properties
+    Then Navigate to the properties page of plugin: "Trash"
+    Then Validate "SQL Server2" plugin properties
+    Then Close the Plugin Properties page
+    Then Save and Deploy Pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+
   @GCS_DELIMITED_TEST @BQ_SINK_TEST
   Scenario: To verify Successful GCS to BigQuery data transfer with Delimiter
     Given Open Datafusion Project to configure pipeline
