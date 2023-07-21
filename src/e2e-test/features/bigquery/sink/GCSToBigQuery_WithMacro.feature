@@ -1,7 +1,7 @@
 @BigQuery_Sink
 Feature: BigQuery sink - Verification of GCS to BigQuery successful data transfer with macro arguments
 
-  @CMEK @GCS_CSV_TEST @BQ_SINK_TEST @BigQuery_Sink_Required
+  @CMEK @GCS_CSV_TEST @BQ_SINK_TEST
   Scenario:Validate successful records transfer from GCS to BigQuery with macro arguments
     Given Open Datafusion Project to configure pipeline
     When Source is GCS

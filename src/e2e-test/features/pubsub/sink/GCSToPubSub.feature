@@ -204,7 +204,7 @@ Feature: PubSub-Sink - Verification of GCS to PubSub successful data transfer
     Examples:
       | GcsPath    | SourceFormat | SinkFormat |
       | gcsTsvFile | tsv          | parquet    |
-    @GCS_CSV_TEST @PubSub_Sink_Required
+    @GCS_CSV_TEST
     Examples:
       | GcsPath    | SourceFormat | SinkFormat |
       | gcsCsvFile | csv          | json       |
@@ -217,7 +217,7 @@ Feature: PubSub-Sink - Verification of GCS to PubSub successful data transfer
       | GcsPath    | SourceFormat | SinkFormat |
       | gcsCsvFile | csv          | tsv        |
 
-  @PubSub_Sink_Required
+
   Scenario Outline: To verify data is getting transferred from GCS to PubSub with different text format in source and delimited format in Sink
     Given Open Datafusion Project to configure pipeline
     When Source is GCS
