@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -876,5 +877,11 @@ public class TestSetupHooks {
   @After(order = 2, value = "@BQ_EXECUTE_UPDATE_SQL")
   public static void setUpdateQueryBackWithTableDetailsPlaceholder() {
     setQueryBackWithTableDetailsPlaceholder("bqExecuteDMLUpdate");
+  }
+
+  @Before(order = 2, value = "@MULTIPLEDATABASETABLE_SOURCE_DATATYPES_TEST")
+  public static void createMultipleDatabaseDatatypesTable() throws SQLException, ClassNotFoundException {
+    BQMTClient.createSourceDatatypesTable(PluginPropertyUtils.pluginProp("sourceTable"));
+    BQMTClient.createTargetDatatypesTable(PluginPropertyUtils.pluginProp("targetTable"));
   }
 }

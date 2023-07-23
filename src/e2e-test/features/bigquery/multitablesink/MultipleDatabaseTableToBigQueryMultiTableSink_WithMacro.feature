@@ -15,24 +15,27 @@
 @BigQueryMultiTable_Sink
 Feature: BigQueryMultiTable sink -Verification of BigQuery to BigQueryMultiTable successful data transfer using macros
 
-  @BQ_SOURCE_DATATYPE_TEST @BQ_SINK_TEST
+  @MULTIPLEDATABASETABLE_SOURCE_DATATYPES_TEST @BQ_SINK_TEST
   Scenario:Verify data is getting transferred from BigQuery to BQMT sink with all datatypes using macros
     Given Open Datafusion Project to configure pipeline
-    When Source is BigQuery
-    When Sink is BiqQuery Multi Table
-    Then Open BigQuery source properties
-    Then Enter BigQuery property reference name
-    Then Enter BigQuery property "projectId" as macro argument "bqProjectId"
-    Then Enter BigQuery property "datasetProjectId" as macro argument "bqDatasetProjectId"
-    Then Enter BigQuery property "serviceAccountType" as macro argument "serviceAccountType"
-    Then Enter BigQuery property "serviceAccountFilePath" as macro argument "serviceAccount"
-    Then Enter BigQuery property "serviceAccountJSON" as macro argument "serviceAccount"
-    Then Enter BigQuery property "dataset" as macro argument "bqDataset"
-    Then Enter BigQuery property "table" as macro argument "bqSourceTable"
-    Then Validate "BigQuery" plugin properties
-    Then Close the BigQuery properties
-    Then Open the BiqQueryMultiTable sink properties
-    Then Enter BiqQueryMultiTable sink property reference name
+    When Expand Plugin group in the LHS plugins list: "Source"
+    When Select plugin: "MultiTableDatabase" from the plugins list as: "Source"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    When Select plugin: "BigQueryMultiTable" from the plugins list as: "Sink"
+    Then Connect plugins: "MultiTableDatabase" and "BigQuery" to establish connection
+    Then Navigate to the properties page of plugin: "MultiTableDatabase"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    Then Replace input plugin property: "connectionString" with value: "connectionString" for Credentials and Authorization related fields
+    Then Replace input plugin property: "jdbcPluginName" with value: "jdbcPluginName" for Credentials and Authorization related fields
+    Then Replace input plugin property: "user" with value: "user" for Credentials and Authorization related fields
+    Then Replace input plugin property: "password" with value: "password" for Credentials and Authorization related fields
+    Then Enter textarea plugin property: "sqlStatements" with value: "selectQuery"
+    And Enter input plugin property: "tableNameField" with value: "tableNameField"
+    Then Verify the Output Schema matches the Expected Schema: "datatypesSchema"
+    Then Validate "MultiTableDatabase" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "BigQueryMultiTable"
+    And Enter input plugin property: "referenceName" with value: "Reference"
     Then Enter BigQueryMultiTable sink property "projectId" as macro argument "bqProjectId"
     Then Enter BigQueryMultiTable sink property "datasetProjectId" as macro argument "bqDatasetProjectId"
     Then Enter BigQueryMultiTable sink property "serviceAccountType" as macro argument "serviceAccountType"
@@ -40,7 +43,7 @@ Feature: BigQueryMultiTable sink -Verification of BigQuery to BigQueryMultiTable
     Then Enter BigQueryMultiTable sink property "serviceAccountJSON" as macro argument "serviceAccount"
     Then Enter BigQueryMultiTable sink property "dataset" as macro argument "bqDataset"
     Then Enter BigQueryMultiTable sink property "truncateTable" as macro argument "bqTruncateTable"
-    Then Toggle BiqQueryMultiTable sink property allow flexible schema to "true"
+    Then Verify toggle plugin property: "allow flexible schema" is toggled to: "true"
     Then Enter BigQueryMultiTable sink property "allowSchemaRelaxation" as macro argument "bqmtUpdateTableSchema"
     Then Validate "BigQueryMultiTable" plugin properties
     Then Close the BiqQueryMultiTable properties
@@ -62,6 +65,3 @@ Feature: BigQueryMultiTable sink -Verification of BigQuery to BigQueryMultiTable
     Then Wait till pipeline is in running state
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
-
-
-
