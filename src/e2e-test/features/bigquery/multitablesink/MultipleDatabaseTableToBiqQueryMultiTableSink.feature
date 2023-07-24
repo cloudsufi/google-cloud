@@ -44,7 +44,7 @@ Feature: BigQueryMultiTable sink -Verification of MultipleDatabaseTable to BigQu
     Then Verify toggle plugin property: " allow flexible schema" is toggled to: "true"
     Then Verify toggle plugin property: "update table schema" is toggled to: "true"
     Then Validate "BigQueryMultiTable" plugin properties
-    Then Close the BiqQueryMultiTable properties
+    And Close the Plugin Properties page
     Then Save the pipeline
     Then Preview and run the pipeline
     Then Wait till pipeline preview is in running state
@@ -86,10 +86,10 @@ Feature: BigQueryMultiTable sink -Verification of MultipleDatabaseTable to BigQu
     Then Override Service account details if set in environment variables
     Then Verify toggle plugin property: "truncateTable" is toggled to: "true"
     Then Enter input plugin property: "splitField" with value: "bqmtSplitField"
-    Then Toggle BiqQueryMultiTable sink property allow flexible schema to "true"
-    Then Select BiqQueryMultiTable sink property update table schema as "true"
+    Then Verify toggle plugin property: " allow flexible schema" is toggled to: "true"
+    Then Verify toggle plugin property: "update table schema" is toggled to: "true"
     Then Validate "BigQueryMultiTable" plugin properties
-    Then Close the BiqQueryMultiTable properties
+    And Close the Plugin Properties page
     Then Save the pipeline
     Then Preview and run the pipeline
     Then Wait till pipeline preview is in running state

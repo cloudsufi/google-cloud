@@ -15,7 +15,7 @@
 @BigQueryMultiTable_Sink
 Feature: BigQueryMultiTable sink -Verification of BigQuery to BigQueryMultiTable successful data transfer using macros
 
-  @MULTIPLEDATABASETABLE_SOURCE_DATATYPES_TEST @BQ_SINK_TEST
+  @MULTIPLEDATABASETABLE_SOURCE_DATATYPES_TEST
   Scenario:Verify data is getting transferred from BigQuery to BQMT sink with all datatypes using macros
     Given Open Datafusion Project to configure pipeline
     When Expand Plugin group in the LHS plugins list: "Source"
@@ -36,17 +36,16 @@ Feature: BigQueryMultiTable sink -Verification of BigQuery to BigQueryMultiTable
     And Close the Plugin Properties page
     Then Navigate to the properties page of plugin: "BigQueryMultiTable"
     And Enter input plugin property: "referenceName" with value: "Reference"
-    Then Enter BigQueryMultiTable sink property "projectId" as macro argument "bqProjectId"
-    Then Enter BigQueryMultiTable sink property "datasetProjectId" as macro argument "bqDatasetProjectId"
-    Then Enter BigQueryMultiTable sink property "serviceAccountType" as macro argument "serviceAccountType"
-    Then Enter BigQueryMultiTable sink property "serviceAccountFilePath" as macro argument "serviceAccount"
-    Then Enter BigQueryMultiTable sink property "serviceAccountJSON" as macro argument "serviceAccount"
-    Then Enter BigQueryMultiTable sink property "dataset" as macro argument "bqDataset"
-    Then Enter BigQueryMultiTable sink property "truncateTable" as macro argument "bqTruncateTable"
+    Then Click on the Macro button of Property: "projectId" and set the value in textarea: "bqProjectId"
+    Then Click on the Macro button of Property: "datasetProjectId" and set the value in textarea: "bqDatasetProjectId"
+    Then Click on the Macro button of Property: "serviceAccountType" and set the value in textarea: "serviceAccountType"
+    Then Click on the Macro button of Property: "serviceAccountFilePath" and set the value in textarea: "serviceAccount"
+    Then Click on the Macro button of Property: "dataset" and set the value in textarea: "bqDataset"
+    Then Verify toggle plugin property: "truncateTable" is toggled to: "true"
     Then Verify toggle plugin property: "allow flexible schema" is toggled to: "true"
-    Then Enter BigQueryMultiTable sink property "allowSchemaRelaxation" as macro argument "bqmtUpdateTableSchema"
+    Then Verify toggle plugin property: "allowSchemaRelaxation" is toggled to: "true"
     Then Validate "BigQueryMultiTable" plugin properties
-    Then Close the BiqQueryMultiTable properties
+    And Close the Plugin Properties page
     Then Connect source as "BigQuery" and sink as "BigQueryMultiTable" to establish connection
     Then Save the pipeline
     Then Preview and run the pipeline

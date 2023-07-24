@@ -20,7 +20,6 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.StorageException;
 import io.cdap.e2e.pages.actions.CdfConnectionActions;
 import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
-import io.cdap.e2e.utils.BigQueryClient;
 import io.cdap.e2e.utils.PluginPropertyUtils;
 import io.cdap.e2e.utils.StorageClient;
 import io.cdap.plugin.utils.PubSubClient;
@@ -229,7 +228,7 @@ public class TestSetupHooks {
   @After(order = 1, value = "@BQ_SINK_TEST")
   public static void deleteTempTargetBQTable() throws IOException, InterruptedException {
     try {
-      BigQueryClient.dropBqQuery(bqTargetTable);
+      io.cdap.e2e.utils.BigQueryClient.dropBqQuery(bqTargetTable);
       PluginPropertyUtils.removePluginProp("bqTargetTable");
       BeforeActions.scenario.write("BQ Target table - " + bqTargetTable + " deleted successfully");
       bqTargetTable = StringUtils.EMPTY;
@@ -256,7 +255,7 @@ public class TestSetupHooks {
       records.append(" (").append(index).append(", ").append((int) (Math.random() * 1000 + 1)).append(", '")
         .append(UUID.randomUUID()).append("'), ");
     }
-    BigQueryClient.getSoleQueryResult("create table `test_automation." + bqSourceTable + "` as " +
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `test_automation." + bqSourceTable + "` as " +
                                         "SELECT * FROM UNNEST([ " +
                                         " STRUCT(1 AS Id, " + ((int) (Math.random() * 1000 + 1)) + " as Value, " +
                                         "'" + UUID.randomUUID() + "' as UID), " +
@@ -270,7 +269,7 @@ public class TestSetupHooks {
 
   @After(order = 1, value = "@BQ_SOURCE_TEST or @BQ_PARTITIONED_SOURCE_TEST or @BQ_SOURCE_DATATYPE_TEST")
   public static void deleteTempSourceBQTable() throws IOException, InterruptedException {
-    BigQueryClient.dropBqQuery(bqSourceTable);
+    io.cdap.e2e.utils.BigQueryClient.dropBqQuery(bqSourceTable);
     PluginPropertyUtils.removePluginProp("bqSourceTable");
     BeforeActions.scenario.write("BQ source Table " + bqSourceTable + " deleted successfully");
     bqSourceTable = StringUtils.EMPTY;
@@ -286,11 +285,11 @@ public class TestSetupHooks {
   @Before(order = 1, value = "@BQ_PARTITIONED_SOURCE_TEST")
   public static void createTempPartitionedSourceBQTable() throws IOException, InterruptedException {
     bqSourceTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
-    BigQueryClient.getSoleQueryResult("create table `test_automation." + bqSourceTable + "` " +
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `test_automation." + bqSourceTable + "` " +
                                         "(transaction_id INT64, transaction_uid STRING, transaction_date DATE ) " +
                                         "PARTITION BY _PARTITIONDATE");
     try {
-      BigQueryClient.getSoleQueryResult("INSERT INTO `test_automation." + bqSourceTable + "` " +
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `test_automation." + bqSourceTable + "` " +
                                           "(transaction_id, transaction_uid, transaction_date) " +
                                           "SELECT ROW_NUMBER() OVER(ORDER BY GENERATE_UUID()), GENERATE_UUID(), date " +
                                           "FROM UNNEST(GENERATE_DATE_ARRAY('2022-01-01', current_date())) AS date");
@@ -347,9 +346,9 @@ public class TestSetupHooks {
       Assert.fail("Exception in BigQuery testdata prerequisite setup " +
                     "- error in reading insert data query file " + e.getMessage());
     }
-    BigQueryClient.getSoleQueryResult(createTableQuery);
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult(createTableQuery);
     try {
-      BigQueryClient.getSoleQueryResult(insertDataQuery);
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult(insertDataQuery);
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
@@ -365,7 +364,7 @@ public class TestSetupHooks {
 
   @After(order = 2, value = "@BQ_SOURCE_VIEW_TEST")
   public static void deleteTempSourceBQView() throws IOException, InterruptedException {
-    BigQueryClient.getSoleQueryResult("DROP VIEW IF EXISTS " + PluginPropertyUtils.pluginProp("dataset") +
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("DROP VIEW IF EXISTS " + PluginPropertyUtils.pluginProp("dataset") +
                                         "." + bqSourceView);
     BeforeActions.scenario.write("BQ source View " + bqSourceView + " deleted successfully");
     bqSourceView = StringUtils.EMPTY;
@@ -387,7 +386,7 @@ public class TestSetupHooks {
       Assert.fail("Exception in BigQuery testdata prerequisite setup " +
                     "- error in reading create view query file " + e.getMessage());
     }
-    BigQueryClient.getSoleQueryResult(createViewQuery);
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult(createViewQuery);
     BeforeActions.scenario.write("BQ Source View " + bqSourceView + " created successfully");
   }
 
@@ -764,7 +763,7 @@ public class TestSetupHooks {
   @Before(order = 1, value = "@BQ_SOURCE_BQ_EXECUTE_TEST")
   public static void createBQTableForBQExecuteTest() throws IOException, InterruptedException {
     String bqSourceBQExecuteTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
-    BigQueryClient.getSoleQueryResult("create table `" + PluginPropertyUtils.pluginProp("dataset") + "."
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + PluginPropertyUtils.pluginProp("dataset") + "."
                                         + bqSourceBQExecuteTable + "` as " +
                                         "SELECT * FROM UNNEST([ " +
                                         " STRUCT(1 AS Id, '" + PluginPropertyUtils.pluginProp("projectId")
@@ -779,7 +778,7 @@ public class TestSetupHooks {
   public static void deleteBQTableForBQExecuteTest() throws IOException, InterruptedException {
     try {
       String bqSourceTable = PluginPropertyUtils.pluginProp("bqSourceTable");
-      BigQueryClient.dropBqQuery(bqSourceTable);
+      io.cdap.e2e.utils.BigQueryClient.dropBqQuery(bqSourceTable);
       PluginPropertyUtils.removePluginProp("bqSourceTable");
       BeforeActions.scenario.write("BQ source Table " + bqSourceTable + " deleted successfully");
     } catch (BigQueryException e) {
@@ -814,7 +813,7 @@ public class TestSetupHooks {
     setQueryBackWithTableDetailsPlaceholder("bqExecuteDDLCreate");
     String bqExecuteTable = PluginPropertyUtils.pluginProp("bqExecuteCreateTable");
     try {
-      BigQueryClient.dropBqQuery(bqExecuteTable);
+      io.cdap.e2e.utils.BigQueryClient.dropBqQuery(bqExecuteTable);
       PluginPropertyUtils.removePluginProp("bqExecuteCreateTable");
       BeforeActions.scenario.write("BQ Execute created Target table - " + bqExecuteTable + " deleted successfully");
     } catch (BigQueryException e) {
@@ -854,7 +853,7 @@ public class TestSetupHooks {
   public static int getBigQueryRecordsCountByQuery(String table, String countQuery)
     throws IOException, InterruptedException {
     replaceTableDetailsInQuery(countQuery, table);
-    Optional<String> result = BigQueryClient.getSoleQueryResult(PluginPropertyUtils.pluginProp(countQuery));
+    Optional<String> result = io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult(PluginPropertyUtils.pluginProp(countQuery));
     setQueryBackWithTableDetailsPlaceholder(countQuery);
     return result.map(Integer::parseInt).orElse(0);
   }
@@ -881,7 +880,7 @@ public class TestSetupHooks {
 
   @Before(order = 2, value = "@MULTIPLEDATABASETABLE_SOURCE_DATATYPES_TEST")
   public static void createMultipleDatabaseDatatypesTable() throws SQLException, ClassNotFoundException {
-    BQMTClient.createSourceDatatypesTable(PluginPropertyUtils.pluginProp("sourceTable"));
-    BQMTClient.createTargetDatatypesTable(PluginPropertyUtils.pluginProp("targetTable"));
+    BigQueryClient.createSourceDatatypesTable(PluginPropertyUtils.pluginProp("sourceTable"));
+    BigQueryClient.createTargetDatatypesTable(PluginPropertyUtils.pluginProp("targetTable"));
   }
 }

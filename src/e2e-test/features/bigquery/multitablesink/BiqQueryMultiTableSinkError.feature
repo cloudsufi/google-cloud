@@ -17,9 +17,10 @@ Feature: BigQueryMultiTable sink - Validate BigQueryMultiTable sink plugin error
 
   Scenario Outline: Verify BigQueryMultiTable Sink properties validation errors for mandatory fields
     Given Open Datafusion Project to configure pipeline
-    When Sink is BiqQuery Multi Table
-    Then Open BiqQueryMultiTable sink properties
-    Then Enter the BigQueryMultiTable properties with blank property "<property>"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    When Select plugin: "BigQueryMultiTable" from the plugins list as: "Sink"
+    Then Navigate to the properties page of plugin: "BigQueryMultiTable"
+    Then Click on the Validate button
     Then Validate mandatory property error for "<property>"
     Examples:
       | property |
@@ -27,42 +28,42 @@ Feature: BigQueryMultiTable sink - Validate BigQueryMultiTable sink plugin error
 
   Scenario:Verify BQMT Sink properties validation errors for incorrect value of chunk size
     Given Open Datafusion Project to configure pipeline
-    When Sink is BiqQuery Multi Table
-    Then Open the BiqQueryMultiTable sink properties
-    Then Enter BiqQueryMultiTable sink property projectId "projectId"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    Then Navigate to the properties page of plugin: "BigQueryMultiTable"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    And Replace input plugin property: "project" with value: "projectId"
+    And Enter input plugin property: "dataset" with value: "dataset"
     Then Override Service account details if set in environment variables
-    Then Enter BiqQueryMultiTable sink property reference name
-    Then Enter BiqQueryMultiTable sink property dataset "dataset"
-    Then Enter BiqQueryMultiTable sink property GCS upload request chunk size "bqmtInvalidChunkSize"
-    Then Verify the BiqQueryMultiTable sink validation error message for invalid property "gcsChunkSize"
+    Then Enter input plugin property: "gcsChunkSize" with value: "bqmtInvalidChunkSize"
+    Then Verify that the Plugin Property: "gcsChunkSize" is displaying an in-line error message: "errorMessageIncorrectBQMTChunkSize"
 
   Scenario:Verify BQMT Sink properties validation errors for incorrect dataset
     Given Open Datafusion Project to configure pipeline
-    When Sink is BiqQuery Multi Table
-    Then Open the BiqQueryMultiTable sink properties
-    Then Enter BiqQueryMultiTable sink property projectId "projectId"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    Then Navigate to the properties page of plugin: "BigQueryMultiTable"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    And Replace input plugin property: "project" with value: "projectId"
     Then Override Service account details if set in environment variables
-    Then Enter BiqQueryMultiTable sink property reference name
-    Then Enter BiqQueryMultiTable sink property dataset "bqmtInvalidSinkDataset"
-    Then Verify the BiqQueryMultiTable sink validation error message for invalid property "dataset"
+    Then Enter input plugin property: "dataset" with value: "bqmtInvalidSinkDataset"
+    Then Verify that the Plugin Property: "dataset" is displaying an in-line error message: "errorMessageIncorrectBQMTDataset"
 
   Scenario:Verify BQMT Sink properties validation errors for incorrect reference name
     Given Open Datafusion Project to configure pipeline
-    When Sink is BiqQuery Multi Table
-    Then Open the BiqQueryMultiTable sink properties
-    Then Enter BiqQueryMultiTable sink property projectId "projectId"
-    Then Enter BiqQueryMultiTable sink property dataset "dataset"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    Then Navigate to the properties page of plugin: "BigQueryMultiTable"
+    And Replace input plugin property: "project" with value: "projectId"
+    And Enter input plugin property: "dataset" with value: "dataset"
     Then Override Service account details if set in environment variables
-    Then Enter BiqQueryMultiTable sink property reference name "bqmtInvalidSinkReferenceName"
-    Then Verify the BiqQueryMultiTable sink validation error message for invalid property "referenceName"
+    Then Enter input plugin property: "referenceName" with value: "bqmtInvalidSinkReferenceName"
+    Then Verify that the Plugin Property: "referenceName" is displaying an in-line error message: "errorMessageIncorrectBQMTReferenceName"
 
   Scenario:Verify BQMT Sink properties validation errors for incorrect value of temporary bucket name
     Given Open Datafusion Project to configure pipeline
-    When Sink is BiqQuery Multi Table
-    Then Open the BiqQueryMultiTable sink properties
-    Then Enter BiqQueryMultiTable sink property projectId "projectId"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    Then Navigate to the properties page of plugin: "BigQueryMultiTable"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    And Replace input plugin property: "project" with value: "projectId"
+    And Enter input plugin property: "dataset" with value: "dataset"
     Then Override Service account details if set in environment variables
-    Then Enter BiqQueryMultiTable sink property reference name
-    Then Enter BiqQueryMultiTable sink property dataset "dataset"
-    Then Enter BiqQueryMultiTable sink property temporary bucket name "bqmtInvalidTemporaryBucket"
-    Then Verify the BiqQueryMultiTable sink validation error message for invalid property "bucket"
+    Then Enter input plugin property: "bucket" with value: "bqmtInvalidTemporaryBucket"
+    Then Verify that the Plugin Property: "bucket" is displaying an in-line error message: "errorMessageIncorrectBQMTBucketName"
