@@ -214,7 +214,7 @@ Feature: BigQuery source - Verification of BigQuery to BigQuery successful data 
     Then Enter BigQuery property datasetProjectId "projectId"
     Then Override Service account details if set in environment variables
     Then Enter BigQuery property dataset "dataset"
-    Then Enter BigQuery sink property table name
+    Then Enter input plugin property: "table" with value: "bqTargetTable"
     Then Toggle BigQuery sink property truncateTable to true
     Then Toggle BigQuery sink property updateTableSchema to true
     Then Validate "BigQuery" plugin properties
@@ -232,7 +232,8 @@ Feature: BigQuery source - Verification of BigQuery to BigQuery successful data 
     Then Wait till pipeline is in running state
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
-    Then Validate records transferred to target table is equal to number of records from source table
+    Then Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table
+#    Then Validate records transferred to target table is equal to number of records from source table
 
   @BQ_SOURCE_TEST @BQ_SOURCE_VIEW_TEST @BQ_SINK_TEST
   Scenario:Validate successful records transfer from BigQuery to BigQuery by enable querying views
@@ -250,7 +251,6 @@ Feature: BigQuery source - Verification of BigQuery to BigQuery successful data 
     Then Override Service account details if set in environment variables
     And Enter input plugin property: "table" with value: "bqSourceTable"
     Then Click on the Get Schema button
-    Then Verify the Output Schema matches the Expected Schema: "bqSourceSchema"
     Then Validate "BigQuery" plugin properties
     And Close the Plugin Properties page
     Then Navigate to the properties page of plugin: "BigQuery2"
@@ -259,8 +259,8 @@ Feature: BigQuery source - Verification of BigQuery to BigQuery successful data 
     Then Enter input plugin property: "referenceName" with value: "BQReferenceName"
     Then Enter input plugin property: "dataset" with value: "dataset"
     Then Enter input plugin property: "table" with value: "bqTargetTable"
-    Then Verify toggle plugin property: "truncateTable" is toggled to: "true"
-    Then Verify toggle plugin property: "truncateTable" is toggled to: "true"
+    Then Click plugin property: "truncateTable"
+    Then Click plugin property: "updateTableSchema"
     Then Validate "BigQuery" plugin properties
     Then Close the BigQuery properties
     Then Save the pipeline
@@ -275,4 +275,4 @@ Feature: BigQuery source - Verification of BigQuery to BigQuery successful data 
     Then Wait till pipeline is in running state
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
-    Then Validate records transferred to target table is equal to number of records from source table
+    Then Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table

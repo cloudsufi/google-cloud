@@ -16,7 +16,6 @@
 package io.cdap.plugin.bigquery.stepsdesign;
 
 import io.cdap.e2e.pages.actions.CdfBigQueryPropertiesActions;
-import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
 import io.cdap.e2e.pages.actions.CdfStudioActions;
 import io.cdap.e2e.pages.locators.CdfStudioLocators;
 import io.cdap.e2e.utils.ElementHelper;
@@ -25,9 +24,6 @@ import io.cdap.plugin.common.stepsdesign.TestSetupHooks;
 import io.cdap.plugin.utils.E2EHelper;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cdap.plugin.bigquerymultitable.actions.BQMTActions;
-import io.cdap.plugin.utils.E2EHelper;
-import io.cdap.plugin.utils.E2ETestConstants;
 
 import java.io.IOException;
 import java.util.UUID;

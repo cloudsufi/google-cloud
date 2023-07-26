@@ -6,5 +6,5 @@ committer STRUCT<name STRING, email STRING, time_sec INT64, tz_offset INT64, dat
 trailer ARRAY<STRUCT<key STRING, value STRING, email STRING>>,
 difference ARRAY<STRUCT<old_mode INT64, new_mode INT64, old_path STRING, new_path STRING, old_sha1 STRING,
 new_sha1 STRING, old_repo STRING, new_repo STRING>>,
-Userdata STRUCT<age INT64, company STRING>, tablename STRING
+Userdata STRUCT<age INT64, company STRING> , tablename STRING
 )

@@ -15,15 +15,8 @@
  */
 
 package io.cdap.plugin.common.stepsdesign;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.StorageException;
-import io.cdap.e2e.pages.actions.CdfGcsActions;
 import io.cdap.e2e.pages.actions.CdfPipelineRunAction;
-import io.cdap.e2e.pages.actions.CdfStudioActions;
-import io.cdap.e2e.pages.locators.CdfGCSLocators;
-import io.cdap.e2e.pages.locators.CdfStudioLocators;
 import io.cdap.e2e.utils.BigQueryClient;
-import io.cdap.e2e.utils.ConstantsUtil;
 import io.cdap.e2e.utils.PluginPropertyUtils;
 import io.cdap.e2e.utils.SeleniumHelper;
 import io.cdap.e2e.utils.StorageClient;
@@ -54,6 +47,20 @@ public class BigQuery {
     boolean recordsMatched = ValidationHelper.validateBQDataToGCS(
       TestSetupHooks.bqSourceTable, TestSetupHooks.gcsTargetBucketName);
     Assert.assertTrue("Value of records transferred to the GCS bucket file should be equal to the value " +
+                        "of the records in the source table", recordsMatched);
+  }
+
+  @Then("Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table")
+  public void validateTheValuesOfRecordsTransferredToBQsinkIsEqualToTheValuesFromSourceBigQueryTable()
+    throws InterruptedException, IOException {
+    int sourceBQRecordsCount = BigQueryClient.countBqQuery(PluginPropertyUtils.pluginProp("bqSourceTable"));
+    BeforeActions.scenario.write("No of Records from source BigQuery table:" + sourceBQRecordsCount);
+    Assert.assertEquals("Out records should match with BigQuery source records count",
+                        CdfPipelineRunAction.getCountDisplayedOnSourcePluginAsRecordsOut(), sourceBQRecordsCount);
+
+    boolean recordsMatched = BQValidation.validateSourceBQToTargetBQRecord(
+      TestSetupHooks.bqSourceTable, TestSetupHooks.bqTargetTable);
+    Assert.assertTrue("Value of records transferred to the BQ sink should be equal to the value " +
                         "of the records in the source table", recordsMatched);
   }
 }

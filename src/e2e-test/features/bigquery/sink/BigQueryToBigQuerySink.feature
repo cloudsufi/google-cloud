@@ -88,8 +88,10 @@ Then Verify the partition table is created with partitioned on field "bqPartitio
     Then Enter input plugin property: "dataset" with value: "dataset"
     Then Enter input plugin property: "table" with value: "bqTargetTable"
     And Select radio button plugin property: "operation" with value: "update"
-    And Enter textarea plugin property: "relationTableKey" with value: "tableKey"
-    And Enter textarea plugin property: "dedupeBy" with value: "dedupeKey"
+    Then Click plugin property: "updateTableSchema"
+    Then
+    And Replace input plugin property: "relationTableKey" with value: "tableKey"
+    And Replace input plugin property: "dedupeBy" with value: "dedupeKey"
     Then Validate "BigQuery" plugin properties
     And Close the Plugin Properties page
     Then Save the pipeline
@@ -106,7 +108,7 @@ Then Verify the partition table is created with partitioned on field "bqPartitio
     Then Wait till pipeline is in running state
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
-    Then Get count of no of records transferred to target BigQuery Table
+    Then Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table
 
   @BQ_SOURCE_DATATYPE_TEST @BQ_SINK_TEST
   Scenario:Validate successful records transfer from BigQuery to BigQuery with Advanced operations Upsert for table key and dedupe key
@@ -154,7 +156,7 @@ Then Verify the partition table is created with partitioned on field "bqPartitio
     Then Wait till pipeline is in running state
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
-    Then Get count of no of records transferred to target BigQuery Table
+    Then Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table
 
   @BQ_SOURCE_TEST @BQ_SINK_TEST
   Scenario:Validate successful records transfer from BigQuery to BigQuery with clustering order functionality
@@ -199,4 +201,4 @@ Then Verify the partition table is created with partitioned on field "bqPartitio
     Then Wait till pipeline is in running state
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
-    Then Get count of no of records transferred to target BigQuery Table
+    Then Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table

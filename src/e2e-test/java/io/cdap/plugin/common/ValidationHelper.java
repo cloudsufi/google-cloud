@@ -61,8 +61,9 @@ public class ValidationHelper {
   private static final Gson gson = new Gson();
   private static final Logger LOG = LoggerFactory.getLogger(ValidationHelper.class);
 
-//  public static void main(String[] args){
-//    validateBQDataToGCS();
+//  public static void main(String[] args) throws IOException, InterruptedException {
+//    validateBQDataToGCS("BQMTtest","gs://test_gcs_bucket_wrangler/2023-07-24-18-25/part-r-00000");
+//
 //  }
   public static boolean validateBQDataToGCS(String table, String bucketName) throws IOException,
     InterruptedException {
