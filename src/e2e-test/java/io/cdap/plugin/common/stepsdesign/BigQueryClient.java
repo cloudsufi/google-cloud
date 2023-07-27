@@ -22,27 +22,26 @@ public class BigQueryClient {
   public static void createSourceDatatypesTable(String sourceTable) throws SQLException, ClassNotFoundException {
     try (Connection connect = getMysqlConnection();
          Statement statement = connect.createStatement()) {
-      String datatypesColumns = PluginPropertyUtils.pluginProp("datatypesColumns");
-      String createSourceTableQuery = "CREATE TABLE " + sourceTable + " " + datatypesColumns;
-      statement.executeUpdate(createSourceTableQuery);
+      // Insert row1 data
+      String datatypesValues = PluginPropertyUtils.pluginProp("datatypesValueBQMT1");
+      String datatypesColumnsList = PluginPropertyUtils.pluginProp("datatypesColumnsList");
+      statement.executeUpdate(
+        "INSERT INTO " + "." + sourceTable + " " + datatypesColumnsList + " " + datatypesValues);
+// Insert row2 data.
+      String datatypesValues2 = PluginPropertyUtils.pluginProp("datatypesValueBQMT2");
+      String datatypesColumnsList2 = PluginPropertyUtils.pluginProp("datatypesColumnsList");
+      statement.executeUpdate(
+        "INSERT INTO " + "." + sourceTable + " " + datatypesColumnsList2 + " " + datatypesValues2);
 
-      // Insert dummy data.
-      int rowCount = 1;
-      while (!Strings.isNullOrEmpty(PluginPropertyUtils.pluginProp("datatypesValue" + rowCount))) {
-        String datatypesValues = PluginPropertyUtils.pluginProp("datatypesValue" + rowCount);
-        String datatypesColumnsList = PluginPropertyUtils.pluginProp("datatypesColumnsList");
-        statement.executeUpdate("INSERT INTO " + sourceTable + " " + datatypesColumnsList + " " + datatypesValues);
-        rowCount++;
-      }
-    }
-  }
+      String datatypesValues3 = PluginPropertyUtils.pluginProp("datatypesValueBQMT3");
+      String datatypesColumnsList3 = PluginPropertyUtils.pluginProp("datatypesColumnsList");
+      statement.executeUpdate(
+        "INSERT INTO " + "." + sourceTable + " " + datatypesColumnsList3 + " " + datatypesValues3);
 
-  public static void createTargetDatatypesTable(String targetTable) throws SQLException, ClassNotFoundException {
-    try (Connection connect = getMysqlConnection();
-         Statement statement = connect.createStatement()) {
-      String datatypesColumns = PluginPropertyUtils.pluginProp("datatypesColumns");
-      String createTargetTableQuery = "CREATE TABLE " + targetTable + " " + datatypesColumns;
-      statement.executeUpdate(createTargetTableQuery);
+      String datatypesValues4 = PluginPropertyUtils.pluginProp("datatypesValueBQMT4");
+      String datatypesColumnsList4 = PluginPropertyUtils.pluginProp("datatypesColumnsList");
+      statement.executeUpdate(
+        "INSERT INTO " + "." + sourceTable + " " + datatypesColumnsList4 + " " + datatypesValues4);
     }
   }
 }

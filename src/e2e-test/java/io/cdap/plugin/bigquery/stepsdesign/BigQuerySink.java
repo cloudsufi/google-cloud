@@ -16,11 +16,13 @@
 package io.cdap.plugin.bigquery.stepsdesign;
 
 import io.cdap.e2e.pages.actions.CdfBigQueryPropertiesActions;
+import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
 import io.cdap.e2e.pages.actions.CdfStudioActions;
 import io.cdap.e2e.pages.locators.CdfStudioLocators;
 import io.cdap.e2e.utils.ElementHelper;
 import io.cdap.e2e.utils.PluginPropertyUtils;
 import io.cdap.plugin.common.stepsdesign.TestSetupHooks;
+import io.cdap.plugin.gcscreate.actions.GCSCreateActions;
 import io.cdap.plugin.utils.E2EHelper;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -123,5 +125,14 @@ public class BigQuerySink implements E2EHelper {
   @Then("Enter BigQuery sink property GCS upload request chunk size {string}")
   public void enterBigQuerySinkPropertyGCSUploadRequestChunkSize(String chunkSize) {
     CdfBigQueryPropertiesActions.enterChunkSize(PluginPropertyUtils.pluginProp(chunkSize));
+  }
+  @Then("Enter the Table Key property for performing update and upsert operation with value: {string}")
+  public void enterTableKey(String value) {
+    CdfBigQueryPropertiesActions.enterTableKey(value);
+  }
+  @Then("Enter BQ Sink  property DedupeBy {string} and orderBy {string}")
+  public void enterBQSinkPropertydedupeByandorderBy(String dedupeBy, String orderBy) {
+    CdfPluginPropertiesActions.enterDedupeBy(PluginPropertyUtils.pluginProp(dedupeBy));
+    CdfPluginPropertiesActions.clickorderBy(PluginPropertyUtils.pluginProp(orderBy));
   }
 }

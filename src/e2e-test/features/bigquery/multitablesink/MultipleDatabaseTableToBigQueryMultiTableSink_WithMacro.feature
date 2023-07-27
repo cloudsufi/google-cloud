@@ -15,7 +15,7 @@
 @BigQueryMultiTable_Sink
 Feature: BigQueryMultiTable sink -Verification of BigQuery to BigQueryMultiTable successful data transfer using macros
 
-  @MULTIPLEDATABASETABLE_SOURCE_DATATYPES_TEST
+  @MULTIPLEDATABASETABLE_SOURCE_TEST
   Scenario:Verify data is getting transferred from BigQuery to BQMT sink with all datatypes using macros
     Given Open Datafusion Project to configure pipeline
     When Expand Plugin group in the LHS plugins list: "Source"
@@ -64,3 +64,4 @@ Feature: BigQueryMultiTable sink -Verification of BigQuery to BigQueryMultiTable
     Then Wait till pipeline is in running state
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
+    Then

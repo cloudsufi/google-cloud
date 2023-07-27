@@ -62,10 +62,10 @@ public class GCSSource implements E2EHelper {
     CdfGcsActions.enterPathField(PluginPropertyUtils.pluginProp(pathField));
   }
 
-  @Then("Enter GCS source property override field {string} and data type {string}")
-  public void enterGCSSourcePropertyOverrideFieldAndDataType(String overrideField, String dataType) {
-    CdfGcsActions.enterOverride(PluginPropertyUtils.pluginProp(overrideField));
-    CdfGcsActions.clickOverrideDataType(PluginPropertyUtils.pluginProp(dataType));
+  @Then("Enter BQ Sink  property DedupeBy {string} and orderBy {string}")
+  public void enterGCSSourcePropertyOverrideFieldAndDataType(String DedupeBy, String orderBy) {
+    CdfGcsActions.enterOverride(PluginPropertyUtils.pluginProp(DedupeBy));
+    CdfGcsActions.clickOverrideDataType(PluginPropertyUtils.pluginProp(orderBy));
   }
 
   @Then("Enter GCS source property minimum split size {string} and maximum split size {string}")

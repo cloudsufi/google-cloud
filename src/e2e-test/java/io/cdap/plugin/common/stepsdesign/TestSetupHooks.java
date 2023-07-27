@@ -59,6 +59,8 @@ public class TestSetupHooks {
   public static String gcsTargetBucketName = StringUtils.EMPTY;
   public static String bqTargetTable = StringUtils.EMPTY;
   public static String bqSourceTable = StringUtils.EMPTY;
+
+  public static String sourceTable = StringUtils.EMPTY;
   public static String bqSourceView = StringUtils.EMPTY;
   public static String pubSubTargetTopic = StringUtils.EMPTY;
   public static String spannerInstance = StringUtils.EMPTY;
@@ -73,14 +75,14 @@ public class TestSetupHooks {
     if (beforeAllFlag) {
       String serviceAccountType = System.getenv("SERVICE_ACCOUNT_TYPE");
       if (serviceAccountType != null && !serviceAccountType.isEmpty()) {
-          if (serviceAccountType.equalsIgnoreCase("FilePath")) {
-            PluginPropertyUtils.addPluginProp("serviceAccountType", "filePath");
-            String serviceAccountFilePath = System.getenv("SERVICE_ACCOUNT_FILE_PATH");
-            if (!(serviceAccountFilePath == null) && !serviceAccountFilePath.equalsIgnoreCase("auto-detect")) {
-              PluginPropertyUtils.addPluginProp("serviceAccount", serviceAccountFilePath);
-            }
-            return;
+        if (serviceAccountType.equalsIgnoreCase("FilePath")) {
+          PluginPropertyUtils.addPluginProp("serviceAccountType", "filePath");
+          String serviceAccountFilePath = System.getenv("SERVICE_ACCOUNT_FILE_PATH");
+          if (!(serviceAccountFilePath == null) && !serviceAccountFilePath.equalsIgnoreCase("auto-detect")) {
+            PluginPropertyUtils.addPluginProp("serviceAccount", serviceAccountFilePath);
           }
+          return;
+        }
         if (serviceAccountType.equalsIgnoreCase("JSON")) {
           PluginPropertyUtils.addPluginProp("serviceAccountType", "JSON");
           String serviceAccountJSON = System.getenv("SERVICE_ACCOUNT_JSON").replaceAll("[\r\n]+", " ");
@@ -90,8 +92,8 @@ public class TestSetupHooks {
           return;
         }
         Assert.fail("ServiceAccount override failed - ServiceAccount type set in environment variable " +
-                       "'SERVICE_ACCOUNT_TYPE' with invalid value: '" + serviceAccountType + "'. " +
-                       "Value should be either 'FilePath' or 'JSON'");
+                      "'SERVICE_ACCOUNT_TYPE' with invalid value: '" + serviceAccountType + "'. " +
+                      "Value should be either 'FilePath' or 'JSON'");
       }
       beforeAllFlag = false;
     }
@@ -256,18 +258,18 @@ public class TestSetupHooks {
         .append(UUID.randomUUID()).append("'), ");
     }
     io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `test_automation." + bqSourceTable + "` as " +
-                                        "SELECT * FROM UNNEST([ " +
-                                        " STRUCT(1 AS Id, " + ((int) (Math.random() * 1000 + 1)) + " as Value, " +
-                                        "'" + UUID.randomUUID() + "' as UID), " +
-                                        records +
-                                        "  (26, " + ((int) (Math.random() * 1000 + 1)) + ", " +
-                                        "'" + UUID.randomUUID() + "') " +
-                                        "])");
+                                                          "SELECT * FROM UNNEST([ " +
+                                                          " STRUCT(1 AS Id, " + ((int) (Math.random() * 1000 + 1)) + " as Value, " +
+                                                          "'" + UUID.randomUUID() + "' as UID), " +
+                                                          records +
+                                                          "  (26, " + ((int) (Math.random() * 1000 + 1)) + ", " +
+                                                          "'" + UUID.randomUUID() + "') " +
+                                                          "])");
     PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ source Table " + bqSourceTable + " created successfully");
   }
 
-  @After(order = 1, value = "@BQ_SOURCE_TEST or @BQ_PARTITIONED_SOURCE_TEST or @BQ_SOURCE_DATATYPE_TEST")
+  @After(order = 1, value = "@BQ_SOURCE_TEST or @BQ_PARTITIONED_SOURCE_TEST or @BQ_SOURCE_DATATYPE_TESTh")
   public static void deleteTempSourceBQTable() throws IOException, InterruptedException {
     io.cdap.e2e.utils.BigQueryClient.dropBqQuery(bqSourceTable);
     PluginPropertyUtils.removePluginProp("bqSourceTable");
@@ -286,13 +288,13 @@ public class TestSetupHooks {
   public static void createTempPartitionedSourceBQTable() throws IOException, InterruptedException {
     bqSourceTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
     io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `test_automation." + bqSourceTable + "` " +
-                                        "(transaction_id INT64, transaction_uid STRING, transaction_date DATE ) " +
-                                        "PARTITION BY _PARTITIONDATE");
+                                                          "(transaction_id INT64, transaction_uid STRING, transaction_date DATE ) " +
+                                                          "PARTITION BY _PARTITIONDATE");
     try {
       io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `test_automation." + bqSourceTable + "` " +
-                                          "(transaction_id, transaction_uid, transaction_date) " +
-                                          "SELECT ROW_NUMBER() OVER(ORDER BY GENERATE_UUID()), GENERATE_UUID(), date " +
-                                          "FROM UNNEST(GENERATE_DATE_ARRAY('2022-01-01', current_date())) AS date");
+                                                            "(transaction_id, transaction_uid, transaction_date) " +
+                                                            "SELECT ROW_NUMBER() OVER(ORDER BY GENERATE_UUID()), GENERATE_UUID(), date " +
+                                                            "FROM UNNEST(GENERATE_DATE_ARRAY('2022-01-01', current_date())) AS date");
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
@@ -364,8 +366,9 @@ public class TestSetupHooks {
 
   @After(order = 2, value = "@BQ_SOURCE_VIEW_TEST")
   public static void deleteTempSourceBQView() throws IOException, InterruptedException {
-    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("DROP VIEW IF EXISTS " + PluginPropertyUtils.pluginProp("dataset") +
-                                        "." + bqSourceView);
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult(
+      "DROP VIEW IF EXISTS " + PluginPropertyUtils.pluginProp("dataset") +
+        "." + bqSourceView);
     BeforeActions.scenario.write("BQ source View " + bqSourceView + " deleted successfully");
     bqSourceView = StringUtils.EMPTY;
   }
@@ -763,12 +766,13 @@ public class TestSetupHooks {
   @Before(order = 1, value = "@BQ_SOURCE_BQ_EXECUTE_TEST")
   public static void createBQTableForBQExecuteTest() throws IOException, InterruptedException {
     String bqSourceBQExecuteTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
-    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + PluginPropertyUtils.pluginProp("dataset") + "."
-                                        + bqSourceBQExecuteTable + "` as " +
-                                        "SELECT * FROM UNNEST([ " +
-                                        " STRUCT(1 AS Id, '" + PluginPropertyUtils.pluginProp("projectId")
-                                        + "' as ProjectId, " +
-                                        "'" + PluginPropertyUtils.pluginProp("dataset") + "' as Dataset)" + "])");
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult(
+      "create table `" + PluginPropertyUtils.pluginProp("dataset") + "."
+        + bqSourceBQExecuteTable + "` as " +
+        "SELECT * FROM UNNEST([ " +
+        " STRUCT(1 AS Id, '" + PluginPropertyUtils.pluginProp("projectId")
+        + "' as ProjectId, " +
+        "'" + PluginPropertyUtils.pluginProp("dataset") + "' as Dataset)" + "])");
     PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceBQExecuteTable);
     BeforeActions.scenario.write("BQ source Table " + bqSourceBQExecuteTable + " " +
                                    "for @BQ_SOURCE_BQ_EXECUTE_TEST created successfully");
@@ -787,7 +791,7 @@ public class TestSetupHooks {
       } else {
         Assert.fail(e.getMessage());
       }
-  }
+    }
   }
 
   @Before(order = 2, value = "@BQ_EXECUTE_ROW_AS_ARG_SQL")
@@ -853,7 +857,8 @@ public class TestSetupHooks {
   public static int getBigQueryRecordsCountByQuery(String table, String countQuery)
     throws IOException, InterruptedException {
     replaceTableDetailsInQuery(countQuery, table);
-    Optional<String> result = io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult(PluginPropertyUtils.pluginProp(countQuery));
+    Optional<String> result = io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult(
+      PluginPropertyUtils.pluginProp(countQuery));
     setQueryBackWithTableDetailsPlaceholder(countQuery);
     return result.map(Integer::parseInt).orElse(0);
   }
@@ -878,9 +883,70 @@ public class TestSetupHooks {
     setQueryBackWithTableDetailsPlaceholder("bqExecuteDMLUpdate");
   }
 
-  @Before(order = 2, value = "@MULTIPLEDATABASETABLE_SOURCE_DATATYPES_TEST")
+  @Before(order = 1, value = "@MULTIPLEDATABASETABLE_SOURCE_TEST")
   public static void createMultipleDatabaseDatatypesTable() throws SQLException, ClassNotFoundException {
-    BigQueryClient.createSourceDatatypesTable(PluginPropertyUtils.pluginProp("sourceTable"));
-    BigQueryClient.createTargetDatatypesTable(PluginPropertyUtils.pluginProp("targetTable"));
+    BigQueryClient.createSourceDatatypesTable(PluginPropertyUtils.pluginProp("bqSourceTable"));
   }
+
+  @Before(order = 1, value = "@BQ_INSERT_SOURCE_TEST")
+  public static void createSourceBQInsertTable() throws IOException, InterruptedException {
+    bqSourceTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `test_automation." + bqSourceTable + "` " +
+                                                          "(PersonID INT64, LastName STRING, " +
+                                                          "FirstName STRING ) " );
+    try {
+        io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `test_automation." + bqSourceTable + "` " +
+                                                               "(PersonID,  LastName, FirstName)" +
+      "VALUES" + "(5, 'Rani', 'Raja')");
+
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+    PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
+    BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " created successfully");
+  }
+
+  @Before(order = 1, value = "@BQ_UPDATE_SINK_TEST")
+  public static void createSourceBQUpdateTable() throws IOException, InterruptedException {
+
+    bqTargetTable = "E2E_TARGET_" + UUID.randomUUID().toString().replaceAll("-", "_");
+      PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
+      BeforeActions.scenario.write("BQ Target table name - " + bqTargetTable);
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `test_automation." + bqTargetTable + "` " +
+                                                            "(PersonID INT64,LastName STRING," +
+                                                            "FirstName STRING ) ");
+
+      try {
+        io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `test_automation." + bqTargetTable + "` " +
+                                                              "(PersonID,  LastName, FirstName)" +
+                                                              "VALUES" + "(5, 'Kumar', 'Rajan')");
+
+      } catch (NoSuchElementException e) {
+        // Insert query does not return any record.
+        // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      }
+
+    PluginPropertyUtils.addPluginProp(" bqTargetTable",  bqTargetTable);
+      BeforeActions.scenario.write("BQ Target Table " +  bqTargetTable + " updated successfully");
+    }
+
+
+//  @Before(order = 1, value = "@BQ_UPSERT_SINK_TEST")
+//  public static void createSourceBQUpsertTable() throws IOException, InterruptedException {
+//
+//    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `test_automation." + bqSourceTable + "` " +
+//                                                          "(PersonID INT64 PRIMARYKEY, LastName STRING, " +
+//                                                          "FirstName STRING ) " );
+//    try {
+//      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `test_automation." + bqSourceTable + "` " +
+//                                                            "(PersonID,  LastName, FirstName)" +
+//                                                            "VALUES" + "(6, 'tata', 'Sonu')");
+//
+//    } catch (NoSuchElementException e) {
+//      // Insert query does not return any record.
+//      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+//    }
+//    BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " created successfully");
+//  }
 }

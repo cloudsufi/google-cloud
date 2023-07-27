@@ -20,6 +20,7 @@ import io.cdap.e2e.utils.BigQueryClient;
 import io.cdap.e2e.utils.PluginPropertyUtils;
 import io.cdap.e2e.utils.SeleniumHelper;
 import io.cdap.e2e.utils.StorageClient;
+import io.cdap.plugin.bigquerymultitable.Actions.BQMTValidation;
 import io.cdap.plugin.common.ValidationHelper;
 import io.cdap.plugin.common.stepsdesign.TestSetupHooks;
 import io.cdap.plugin.utils.E2EHelper;
@@ -29,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import stepsdesign.BeforeActions;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Optional;
 
 /**
@@ -62,5 +64,20 @@ public class BigQuery {
       TestSetupHooks.bqSourceTable, TestSetupHooks.bqTargetTable);
     Assert.assertTrue("Value of records transferred to the BQ sink should be equal to the value " +
                         "of the records in the source table", recordsMatched);
+  }
+
+  @Then("Validate the values of records transferred to BQMT sink is equal to the values from source MultiDatabase table")
+  public void validateTheValuesOfRecordsTransferredToBQMTsinkIsEqualToTheValuesFromSourceMultiDatabaseTable()
+    throws InterruptedException, IOException, SQLException, ClassNotFoundException {
+    int sourceBQRecordsCount = BigQueryClient.countBqQuery(PluginPropertyUtils.pluginProp("bqSourceTable"));
+    BeforeActions.scenario.write("No of Records from source MultiDatabase:" + sourceBQRecordsCount);
+    Assert.assertEquals("Out records should match with BigQuery source records count",
+                        CdfPipelineRunAction.getCountDisplayedOnSourcePluginAsRecordsOut(), sourceBQRecordsCount);
+
+    boolean recordsMatched = BQMTValidation.validateMySqlToBQRecordValues(
+      TestSetupHooks.bqSourceTable);
+    Assert.assertTrue("Value of records transferred to the BQ sink should be equal to the value " +
+                        "of the records in the source table", recordsMatched);
+
   }
 }
