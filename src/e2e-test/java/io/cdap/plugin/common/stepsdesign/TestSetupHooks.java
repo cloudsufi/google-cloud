@@ -23,10 +23,12 @@ import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
 import io.cdap.e2e.utils.BigQueryClient;
 import io.cdap.e2e.utils.PluginPropertyUtils;
 import io.cdap.e2e.utils.StorageClient;
+import io.cdap.plugin.bigquerymultitable.stepdesign.MultiTableClient;
 import io.cdap.plugin.utils.PubSubClient;
 import io.cdap.plugin.utils.SpannerClient;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import stepsdesign.BeforeActions;
@@ -38,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +71,9 @@ public class TestSetupHooks {
   public static String spannerTargetDatabase = StringUtils.EMPTY;
   public static String spannerTargetTable = StringUtils.EMPTY;
   public static boolean firstSpannerTestFlag = true;
+  public static String sourceTable = StringUtils.EMPTY;
   public static String datasetName = PluginPropertyUtils.pluginProp("dataset");
+
 
   @Before(order = 1)
   public static void overrideServiceAccountFilePathIfProvided() {
@@ -366,7 +371,7 @@ public class TestSetupHooks {
     createSourceBQViewWithQueries(PluginPropertyUtils.pluginProp("bqCreateViewQueryFile"));
   }
 
-  @After(order = 2, value = "@BQ_SOURCE_VIEW_TESTT")
+  @After(order = 2, value = "@BQ_SOURCE_VIEW_TEST")
   public static void deleteTempSourceBQView() throws IOException, InterruptedException {
     BigQueryClient.getSoleQueryResult("DROP VIEW IF EXISTS " + PluginPropertyUtils.pluginProp("dataset") +
                                         "." + bqSourceView);
@@ -1137,6 +1142,24 @@ public class TestSetupHooks {
     }
     PluginPropertyUtils.addPluginProp(" bqTargetTable", bqTargetTable);
     BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " updated successfully");
+  }
+
+  @Before(order = 1, value = "@MULTIPLEDATABASETABLE_SOURCE_TEST")
+  public static void createMultipleDatabaseDatatypesTable() throws SQLException, ClassNotFoundException {
+    String randomString = RandomStringUtils.randomAlphabetic(10);
+    String sourceTableName = String.format("SourceTable_%s", randomString);
+    PluginPropertyUtils.addPluginProp("sourceTable", sourceTableName);
+    PluginPropertyUtils.addPluginProp("selectQuery", String.format("select * from %s", sourceTableName));
+    MultiTableClient.createSourceDatatypesTable
+      (PluginPropertyUtils.pluginProp("sourceTable"));
+    BeforeActions.scenario.write("My Sql source table - " + sourceTableName + " created successfully");
+  }
+  @After(order = 1, value = "@MULTIPLEDATABASETABLE_SOURCE_TEST")
+  public static void deleteMultipleDatabaseDatatypesTable() throws SQLException, ClassNotFoundException {
+    String sourceTableName = PluginPropertyUtils.pluginProp("sourceTable");
+    MultiTableClient.dropMySqlTable(sourceTableName);
+    PluginPropertyUtils.removePluginProp("sourceTable");
+    BeforeActions.scenario.write("My Sql source table - " + sourceTableName + " deleted successfully");
   }
 
   @Before(value = "@BQ_INSERT_INT_SOURCE_TEST")
