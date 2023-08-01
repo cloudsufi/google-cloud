@@ -74,4 +74,4 @@ Feature: BigQueryMultiTable sink - Validate BigQueryMultiTable sink plugin error
     Then Override Service account details if set in environment variables
     Then Enter input plugin property: "bucket" with value: "bqmtInvalidTemporaryBucket"
     Then Click on the Validate button
-    Then Verify that the Plugin Property: "bucket" is displaying an in-line error message: "errorMessageIncorrectBQMTBucketName"
+    Then Verify that the Plugin Property: "bucket" is displaying an in-line error message: "errorMessageIncorrectBQMTBucketname"
