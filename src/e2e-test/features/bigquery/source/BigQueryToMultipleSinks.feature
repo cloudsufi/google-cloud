@@ -1,7 +1,7 @@
 @BigQuery_Source
 Feature: BigQuery source - Verification of BigQuery to Multiple sinks successful data transfer
 
-  @CMEK @BQ_SOURCE_TEST @GCS_SINK_TEST @BQ_SINK_TEST @PUBSUB_SINK_TEST @CMEK_Required
+  @CMEK @BQ_SOURCE_TEST @GCS_SINK_TEST @BQ_SINK_TEST @PUBSUB_SINK_TEST @CMEK_Required @BigQuery_Source_Required
   Scenario:Validate successful records transfer from BigQuery to multiple sinks (GCS, BigQuery and PubSub)
     Given Open Datafusion Project to configure pipeline
     When Source is BigQuery

@@ -1,7 +1,7 @@
 @PubSub_Sink @PUBSUB_SINK_TEST
 Feature: PubSub-Sink - Verification of BigQuery to PubSub successful data transfer
 
-  @CMEK @BQ_SOURCE_TEST
+  @CMEK @BQ_SOURCE_TEST @PubSub_Sink_Required
   Scenario: To verify data is getting transferred from BigQuery to PubSub successfully
     Given Open Datafusion Project to configure pipeline
     When Source is BigQuery

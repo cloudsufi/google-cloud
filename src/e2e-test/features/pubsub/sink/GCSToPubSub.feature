@@ -1,7 +1,7 @@
 @PubSub_Sink @PUBSUB_SINK_TEST
 Feature: PubSub-Sink - Verification of GCS to PubSub successful data transfer
 
-  @CMEK @GCS_CSV_TEST
+  @CMEK @GCS_CSV_TEST @PubSub_Sink_Required
   Scenario: To verify data is getting transferred from GCS to PubSub successfully
     Given Open Datafusion Project to configure pipeline
     When Source is GCS

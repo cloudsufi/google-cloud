@@ -33,7 +33,7 @@ Feature: GCS source - Verification of GCS to BQ successful data transfer
     Then Verify the pipeline status is "Succeeded"
     Then Get count of no of records transferred to target BigQuery Table
 
-  @BQ_SINK_TEST @GCS_DATATYPE_TEST
+  @BQ_SINK_TEST @GCS_DATATYPE_TEST @GCS_Source_Required
   Scenario: To verify data is getting transferred from GCS to BigQuery with supported DataTypes
     Given Open Datafusion Project to configure pipeline
     When Source is GCS

@@ -1,6 +1,7 @@
 @GCS_Source
 Feature: GCS source - Validate GCS plugin output schema for different formats
 
+  @GCS_Source_Required
   Scenario Outline:GCS Source output schema validation for csv and tsv format
     Given Open Datafusion Project to configure pipeline
     When Source is GCS

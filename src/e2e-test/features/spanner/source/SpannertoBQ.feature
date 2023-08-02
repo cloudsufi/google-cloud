@@ -1,7 +1,7 @@
 @Spanner_Source @SPANNER_TEST
 Feature: Spanner Source - Verification of Spanner to BigQuery successful data transfer
 
-  @BQ_SINK_TEST
+  @BQ_SINK_TEST @Spanner_Source_Required
   Scenario: Verify data is getting transferred from Spanner to BigQuery successfully
     Given Open Datafusion Project to configure pipeline
     When Source is Spanner
