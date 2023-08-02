@@ -1,7 +1,7 @@
 @BigQuery_Source
 Feature: BigQuery source - Verification of BigQuery to GCS successful data transfer
 
-  @CMEK @BQ_SOURCE_TEST @GCS_SINK_TEST
+  @CMEK @BQ_SOURCE_TEST @GCS_SINK_TEST @BigQuery_Source_Required
   Scenario:Validate successful records transfer from BigQuery to GCS
     Given Open Datafusion Project to configure pipeline
     When Source is BigQuery
