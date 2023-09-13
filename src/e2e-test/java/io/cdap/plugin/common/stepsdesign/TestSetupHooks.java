@@ -147,6 +147,10 @@ public class TestSetupHooks {
   public static void createBucketWithRecursiveTestFiles() throws IOException, URISyntaxException {
     gcsSourceBucketName = createGCSBucketWithMultipleFiles(PluginPropertyUtils.pluginProp("gcsReadRecursivePath"));
   }
+  @Before(order = 1, value = "@GCS_MULTIPLE_FILES_TEST")
+  public static void createBucketWithMultipleTestFiles() throws IOException, URISyntaxException {
+    gcsSourceBucketName = createGCSBucketWithMultipleFiles(PluginPropertyUtils.pluginProp("gcsMultipleFilesPath"));
+  }
 
   @Before(order = 1, value = "@GCS_DELETE_WILDCARD_TEST")
   public static void createBucketWithRecursiveTestFiles2() throws IOException, URISyntaxException {
@@ -178,7 +182,7 @@ public class TestSetupHooks {
   @After(order = 1, value = "@GCS_CSV_TEST or @GCS_TSV_TEST or @GCS_BLOB_TEST " +
     "or @GCS_DELIMITED_TEST or @GCS_TEXT_TEST or @GCS_OUTPUT_FIELD_TEST or @GCS_DATATYPE_1_TEST or " +
     "@GCS_DATATYPE_2_TEST or @GCS_READ_RECURSIVE_TEST or @GCS_DELETE_WILDCARD_TEST or @GCS_CSV_RANGE_TEST or" +
-    " @GCS_PARQUET_TEST or @GCS_AVRO_TEST or @GCS_DATATYPE_TEST")
+    " @GCS_PARQUET_TEST or @GCS_AVRO_TEST or @GCS_DATATYPE_TEST or @GCS_MULTIPLE_FILES_TEST")
   public static void deleteSourceBucketWithFile() {
     deleteGCSBucket(gcsSourceBucketName);
     PluginPropertyUtils.removePluginProp("gcsSourceBucketName");
