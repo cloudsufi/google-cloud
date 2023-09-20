@@ -161,7 +161,7 @@ Feature: BigQuery source - Verification of BigQuery to BigQuery successful data 
     Then Enter BigQuery sink property table name
     Then Toggle BigQuery sink property truncateTable to true
     Then Toggle BigQuery sink property updateTableSchema to true
-    Then Enter BigQuery sink property partition field "bqPartitionFieldTime"
+    Then Enter BigQuery sink property partition field "transaction_date"
     Then Validate "BigQuery" plugin properties
     Then Close the BigQuery properties
     Then Connect source as "BigQuery" and sink as "BigQuery" to establish connection
@@ -262,3 +262,246 @@ Feature: BigQuery source - Verification of BigQuery to BigQuery successful data 
     Then Open and capture logs
     Then Verify the pipeline status is "Succeeded"
     Then Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table
+
+
+  @BQ_UPSERT_SOURCE_TEST @BQ_UPSERT_SINK_TEST
+  Scenario: Verify scenario form BigQuery To to ensure that upsert operations are performed without updating the destination table
+    Given Open Datafusion Project to configure pipeline
+    When Expand Plugin group in the LHS plugins list: "Source"
+    When Select plugin: "BigQuery" from the plugins list as: "Source"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    When Select plugin: "BigQuery" from the plugins list as: "Sink"
+    Then Connect plugins: "BigQuery" and "BigQuery2" to establish connection
+    Then Navigate to the properties page of plugin: "BigQuery"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    And Replace input plugin property: "project" with value: "projectId"
+    And Enter input plugin property: "datasetProject" with value: "datasetprojectId"
+    And Replace input plugin property: "dataset" with value: "dataset"
+    And Enter input plugin property: "table" with value: "bqSourceTable"
+    Then Click on the Get Schema button
+    Then Validate "BigQuery" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "BigQuery2"
+    Then Replace input plugin property: "project" with value: "projectId"
+    Then Enter input plugin property: "datasetProject" with value: "projectId"
+    Then Enter input plugin property: "referenceName" with value: "BQReferenceName"
+    Then Enter input plugin property: "dataset" with value: "dataset"
+    Then Enter input plugin property: "table" with value: "bqTargetTable"
+    And Select radio button plugin property: "operation" with value: "upsert"
+    Then Enter Value for plugin property table key : "relationTableKey" with values: "string_value"
+    Then Select dropdown plugin property: "dedupeBy" with option value: "DESC"
+    Then Enter key for plugin property: "dedupeBy" with values: "float_value"
+    Then Click plugin property: "updateTableSchema"
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Save the pipeline
+    Then Preview and run the pipeline
+    Then Wait till pipeline preview is in running state
+    Then Open and capture pipeline preview logs
+    Then Verify the preview run status of pipeline in the logs is "succeeded"
+    Then Close the pipeline logs
+    Then Close the preview
+    Then Deploy the pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+
+
+
+  @BQ_UPDATE_SOURCE_TEST @BQ_UPDATE_SINK_TEST
+  Scenario: Verify form BigQuery To to ensure that update operations are performed and the ensure that the duplicate entries has been removed to sink.
+    Given Open Datafusion Project to configure pipeline
+    When Expand Plugin group in the LHS plugins list: "Source"
+    When Select plugin: "BigQuery" from the plugins list as: "Source"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    When Select plugin: "BigQuery" from the plugins list as: "Sink"
+    Then Connect plugins: "BigQuery" and "BigQuery2" to establish connection
+    Then Navigate to the properties page of plugin: "BigQuery"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    And Replace input plugin property: "project" with value: "projectId"
+    And Enter input plugin property: "datasetProject" with value: "datasetprojectId"
+    And Replace input plugin property: "dataset" with value: "dataset"
+    And Enter input plugin property: "table" with value: "bqSourceTable"
+    Then Click on the Get Schema button
+    Then Validate "BigQuery" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "BigQuery2"
+    Then Replace input plugin property: "project" with value: "projectId"
+    Then Enter input plugin property: "datasetProject" with value: "projectId"
+    Then Enter input plugin property: "referenceName" with value: "BQReferenceName"
+    Then Enter input plugin property: "dataset" with value: "dataset"
+    Then Enter input plugin property: "table" with value: "bqTargetTable"
+    And Select radio button plugin property: "operation" with value: "update"
+    Then Enter Value for plugin property table key : "relationTableKey" with values: "string_value"
+    Then Select dropdown plugin property: "dedupeBy" with option value: "DESC"
+    Then Enter key for plugin property: "dedupeBy" with values: "float_value"
+    Then Click plugin property: "updateTableSchema"
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Save the pipeline
+    Then Preview and run the pipeline
+    Then Wait till pipeline preview is in running state
+    Then Open and capture pipeline preview logs
+    Then Verify the preview run status of pipeline in the logs is "succeeded"
+    Then Close the pipeline logs
+    Then Close the preview
+    Then Deploy the pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+
+
+  @BQ_NULL_MODE_SOURCE_TEST @BQ_SINK_TEST
+  Scenario: Validate Successful record  BigQuery source plugin with all NULL values in one column and Few NULL value in different cloumn.
+    Given Open Datafusion Project to configure pipeline
+    When Expand Plugin group in the LHS plugins list: "Source"
+    When Select plugin: "BigQuery" from the plugins list as: "Source"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    When Select plugin: "BigQuery" from the plugins list as: "Sink"
+    Then Connect plugins: "BigQuery" and "BigQuery2" to establish connection
+    Then Navigate to the properties page of plugin: "BigQuery"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    And Replace input plugin property: "project" with value: "projectId"
+    And Enter input plugin property: "datasetProject" with value: "datasetprojectId"
+    And Replace input plugin property: "dataset" with value: "dataset"
+    And Enter input plugin property: "table" with value: "bqSourceTable"
+    Then Click on the Get Schema button
+    Then Validate "BigQuery" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "BigQuery2"
+    Then Replace input plugin property: "project" with value: "projectId"
+    Then Enter input plugin property: "datasetProject" with value: "projectId"
+    Then Enter input plugin property: "referenceName" with value: "BQReferenceName"
+    Then Enter input plugin property: "dataset" with value: "dataset"
+    Then Enter input plugin property: "table" with value: "bqTargetTable"
+    Then Click plugin property: "updateTableSchema"
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Save the pipeline
+    Then Preview and run the pipeline
+    Then Wait till pipeline preview is in running state
+    Then Open and capture pipeline preview logs
+    Then Verify the preview run status of pipeline in the logs is "succeeded"
+    Then Close the pipeline logs
+    Then Close the preview
+    Then Deploy the pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+    Then Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table
+
+
+
+  @BQ_TIME_STAMP_SOURCE_TEST @BQ_SINK_TEST
+  Scenario: Verify record insert from source BigQuery plugin with partition type Time (Date/timestamp/datetime).
+    Given Open Datafusion Project to configure pipeline
+    When Expand Plugin group in the LHS plugins list: "Source"
+    When Select plugin: "BigQuery" from the plugins list as: "Source"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    When Select plugin: "BigQuery" from the plugins list as: "Sink"
+    Then Connect plugins: "BigQuery" and "BigQuery2" to establish connection
+    Then Navigate to the properties page of plugin: "BigQuery"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    And Replace input plugin property: "project" with value: "projectId"
+    And Enter input plugin property: "datasetProject" with value: "datasetprojectId"
+    And Replace input plugin property: "dataset" with value: "dataset"
+    And Enter input plugin property: "table" with value: "bqSourceTable"
+    Then Click on the Get Schema button
+    Then Validate "BigQuery" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "BigQuery2"
+    Then Replace input plugin property: "project" with value: "projectId"
+    Then Enter input plugin property: "datasetProject" with value: "projectId"
+    Then Enter input plugin property: "referenceName" with value: "BQReferenceName"
+    Then Enter input plugin property: "dataset" with value: "dataset"
+    Then Enter input plugin property: "table" with value: "bqTargetTable"
+    Then Enter input plugin property: "partitionByField" with value: "partiontion_by_field_value"
+    Then Click plugin property: "updateTableSchema"
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Save the pipeline
+    Then Preview and run the pipeline
+    Then Wait till pipeline preview is in running state
+    Then Open and capture pipeline preview logs
+    Then Verify the preview run status of pipeline in the logs is "succeeded"
+    Then Close the pipeline logs
+    Then Close the preview
+    Then Deploy the pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+    #Then Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table
+
+
+  @BQ_INSERT_SOURCE_TEST @BQ_INSERT_SECOND_SOURCE_TEST @BQ_SINK_TEST
+  Scenario: Verify BigQuery With Different Schema RecordName
+    Given Open Datafusion Project to configure pipeline
+    When Expand Plugin group in the LHS plugins list: "Source"
+    When Select plugin: "BigQuery" from the plugins list as: "Source"
+    When Select plugin: "BigQuery" from the plugins list as: "Source"
+    When Expand Plugin group in the LHS plugins list: "Transform"
+    When Select plugin: "Wrangler" from the plugins list as: "Transform"
+    When Select plugin: "Wrangler" from the plugins list as: "Transform"
+    Then Move plugins: "Wrangler" by xOffset 250 and yOffset 300
+    Then Move plugins: "BigQuery" by xOffset 100 and yOffset 200
+    Then Connect plugins: "BigQuery" and "Wrangler2" to establish connection
+    Then Connect plugins: "BigQuery2" and "Wrangler" to establish connection
+    Then Connect plugins: "Wrangler" and "Wrangler2" to establish connection
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    When Select plugin: "BigQuery" from the plugins list as: "Sink"
+    Then Connect plugins: "Wrangler2" and "BigQuery3" to establish connection
+    Then Navigate to the properties page of plugin: "BigQuery2"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    And Replace input plugin property: "project" with value: "projectId"
+    And Enter input plugin property: "datasetProject" with value: "datasetprojectId"
+    And Replace input plugin property: "dataset" with value: "dataset"
+    And Enter input plugin property: "table" with value: "bqSourceTable"
+    Then Click on the Get Schema button
+    Then Validate "BigQuery2" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "BigQuery"
+    And Enter input plugin property: "referenceName" with value: "Reference"
+    And Replace input plugin property: "project" with value: "projectId"
+    And Enter input plugin property: "datasetProject" with value: "datasetprojectId"
+    And Replace input plugin property: "dataset" with value: "dataset"
+    And Enter input plugin property: "table" with value: "bqSourceTable"
+    Then Click on the Get Schema button
+    Then Validate "BigQuery" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "Wrangler"
+    Then Enter textarea plugin property: "directives" with value: "drop :TableName"
+    Then Validate "Wrangler" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "Wrangler2"
+    Then Enter textarea plugin property: "directives" with value: "rename :EmployeeID :EmpID;"
+    Then Validate "Wrangler2" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "BigQuery3"
+    Then Replace input plugin property: "project" with value: "projectId"
+    Then Enter input plugin property: "datasetProject" with value: "projectId"
+    Then Enter input plugin property: "referenceName" with value: "BQReferenceName"
+    Then Enter input plugin property: "dataset" with value: "dataset"
+    Then Enter input plugin property: "table" with value: "bqTargetTable"
+    Then Click plugin property: "updateTableSchema"
+    Then Validate "BigQuery" plugin properties
+    Then Close the BigQuery properties
+    Then Save the pipeline
+    Then Preview and run the pipeline
+    Then Wait till pipeline preview is in running state
+    Then Open and capture pipeline preview logs
+    Then Verify the preview run status of pipeline in the logs is "succeeded"
+    Then Close the pipeline logs
+    Then Close the preview
+    Then Deploy the pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+
+#    Then Validate the values of records transferred to BQ sink is equal to the values from source BigQuery table
+
+

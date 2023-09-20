@@ -59,6 +59,7 @@ public class TestSetupHooks {
   public static String gcsTargetBucketName = StringUtils.EMPTY;
   public static String bqTargetTable = StringUtils.EMPTY;
   public static String bqSourceTable = StringUtils.EMPTY;
+public static String bqSecondSourceTable = StringUtils.EMPTY;
   public static String bqSourceView = StringUtils.EMPTY;
   public static String pubSubTargetTopic = StringUtils.EMPTY;
   public static String spannerInstance = StringUtils.EMPTY;
@@ -920,4 +921,164 @@ public class TestSetupHooks {
     PluginPropertyUtils.addPluginProp(" bqTargetTable",  bqTargetTable);
     BeforeActions.scenario.write("BQ Target Table " +  bqTargetTable + " updated successfully");
   }
+
+  @Before(value = "@BQ_UPSERT_SOURCE_TEST")
+  public static void createSourceBQSourceTable() throws IOException, InterruptedException {
+
+    bqSourceTable = "E2E_TARGET_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
+    BeforeActions.scenario.write("BQ source table name - " + bqSourceTable);
+
+
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSourceTable + "` " +
+            "(string_value STRING, int_value INT64, float_value FLOAT64,boolean_value BOOL)");
+
+
+
+    try {
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSourceTable + "` " +
+              "(string_value,  int_value, float_value,boolean_value)" +
+              "VALUES" +  "('string_1', 1, 0.1,true)," +
+              "('string_1', 2, 0.2,false)," +
+              "('string_3', 3, 0.3,false)");
+
+
+
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+
+    PluginPropertyUtils.addPluginProp(" bqSourceTable",  bqSourceTable);
+    BeforeActions.scenario.write("BQ Source Table " +  bqSourceTable + " updated successfully");
+  }
+
+  @Before(value = "@BQ_UPSERT_SINK_TEST")
+  public static void createSourceBQSinkTable() throws IOException, InterruptedException {
+
+    bqTargetTable = "E2E_TARGET_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
+    BeforeActions.scenario.write("BQ Target table name - " + bqTargetTable);
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqTargetTable + "` " +
+            "(string_value STRING, int_value INT64, float_value FLOAT64,boolean_value BOOL)");
+    try {
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqTargetTable + "` " +
+              "(string_value,  int_value, float_value,boolean_value)" +
+              "VALUES" + "('string_0', 0, 0,true)," +
+              "('string_1', 10, 1.1,false)");
+
+
+
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+
+    PluginPropertyUtils.addPluginProp(" bqTargetTable",  bqTargetTable);
+    BeforeActions.scenario.write("BQ Target Table " +  bqTargetTable + " updated successfully");
+  }
+
+
+  @Before(value = "@BQ_UPDATE_SOURCE_TEST")
+  public static void createSourceBQTable() throws IOException, InterruptedException {
+
+    bqSourceTable = "E2E_TARGET_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
+    BeforeActions.scenario.write("BQ source table name - " + bqSourceTable);
+
+
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSourceTable + "` " +
+            "(string_value STRING, int_value INT64, float_value FLOAT64,boolean_value BOOL)");
+
+
+
+    try {
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSourceTable + "` " +
+              "(string_value,  int_value, float_value,boolean_value)" +
+              "VALUES" +  "('string_1', 1, 0.1,true)," +
+              "('string_1', 2, 0.2,false)");
+
+
+
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+
+    PluginPropertyUtils.addPluginProp(" bqSourceTable",  bqSourceTable);
+    BeforeActions.scenario.write("BQ Source Table " +  bqSourceTable + " updated successfully");
+  }
+
+
+  @Before(value = "@BQ_NULL_MODE_SOURCE_TEST")
+  public static void createNullSourceBQTable() throws IOException, InterruptedException {
+    bqSourceTable = "E2E_TARGET_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
+    BeforeActions.scenario.write("BQ source table name - " + bqSourceTable);
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSourceTable + "` " +
+            "(Address STRING, id INT64, Firstname STRING,LastName STRING)");
+
+    try {
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSourceTable + "` " +
+              "(Address,  id, Firstname, LastName)" +
+              "VALUES" +  "('Agra', 1, 'Neeraj','')," +
+              "('Noida', 2, '','')");
+
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+
+    PluginPropertyUtils.addPluginProp(" bqSourceTable",  bqSourceTable);
+    BeforeActions.scenario.write("BQ Source Table " +  bqSourceTable + " updated successfully");
+  }
+
+
+
+
+
+
+  @Before(value = "@BQ_TIME_STAMP_SOURCE_TEST")
+  public static void createTimeStampBQTable() throws IOException, InterruptedException {
+    bqSourceTable = "E2E_TARGET_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
+    BeforeActions.scenario.write("BQ source table name - " + bqSourceTable);
+    BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSourceTable + "` " +
+            "(Address STRING, transaction_date DATE, Firstname STRING)");
+
+    try {
+      BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSourceTable + "` " +
+              "(Address,  transaction_date, Firstname)" +
+              "VALUES" +  "('Agra', '2021-02-20', 'Neeraj')," +
+              "('Noida', '2021-02-21',''),"+"('Gudgaon', '2021-02-22', 'singhal')");
+
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+
+    PluginPropertyUtils.addPluginProp(" bqSourceTable",  bqSourceTable);
+    BeforeActions.scenario.write("BQ Source Table " +  bqSourceTable + " updated successfully");
+  }
+
+  @Before( order = 2 , value = "@BQ_INSERT_SECOND_SOURCE_TEST")
+  public static void createSecondSourceBQInsertTable() throws IOException, InterruptedException {
+    bqSecondSourceTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-" , "_");
+    BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSecondSourceTable + "` " +
+            "(PersonID INT64, LastName STRING, TableName STRING, FirstName STRING)");
+    try {
+      BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSecondSourceTable + "` " +
+              "(PersonID,  LastName, TableName, FirstName)" +
+              "VALUES" + "(5, 'Rani', 'Test','Raja')");
+
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+    PluginPropertyUtils.addPluginProp("bqSourceTable", bqSecondSourceTable);
+    BeforeActions.scenario.write("BQ Source Table " + bqSecondSourceTable + " created successfully");
+  }
+
+
+
 }
