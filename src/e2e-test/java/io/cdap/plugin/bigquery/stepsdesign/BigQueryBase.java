@@ -32,6 +32,7 @@ import org.junit.Assert;
 import stepsdesign.BeforeActions;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
@@ -259,5 +260,14 @@ public class BigQueryBase implements E2EHelper {
     int count = result.map(Integer::parseInt).orElse(0);
     BeforeActions.scenario.write("Number of records transferred from source table to target table:" + count);
     Assert.assertEquals(count, countRecordsTarget);
+  }
+
+  @Then("Validate the data transferred from BigQuery to BigQuery with actual And expected file for: {string}")
+  public void validateTheDataFromBQToBQWithActualAndExpectedFileFor(String expectedFile) throws IOException,
+    InterruptedException, URISyntaxException {
+    boolean recordsMatched = BQValidationExistingTables.validateActualDataToExpectedData(
+      PluginPropertyUtils.pluginProp("bqTargetTable"),
+      PluginPropertyUtils.pluginProp(expectedFile));
+    Assert.assertTrue("Value of records in actual and expected file is equal", recordsMatched);
   }
 }
