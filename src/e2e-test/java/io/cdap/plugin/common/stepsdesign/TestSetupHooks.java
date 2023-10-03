@@ -271,8 +271,8 @@ public class TestSetupHooks {
   @After(order = 1, value = "@BQ_SOURCE_TEST or @BQ_PARTITIONED_SOURCE_TEST or @BQ_SOURCE_DATATYPE_TEST or " +
     " @BQ_INSERT_SOURCE_TEST or @BQ_UPDATE_SINK_TEST or @BQ_TIME_STAMP_SOURCE_TEST or @BQ_INSERT_INT_SOURCE_TEST" +
     " or @BQ_EXISTING_SOURCE_TEST or @BQ_EXISTING_SINK_TEST or @BQ_UPDATE_SOURCE_DEDUPE_TEST " +
-    "or @BQ_UPDATE_SINK_DEDUPE_TEST or @BQ_UPSERT_SOURCE_TEST or @BQ_UPSERT_SINK_TEST or @BQ_NULL_MODE_SOURCE_TEST" +
-   "or @BQ_UPSERT_DEDUPE_SOURCE_TEST or @BQ_UPSERT_DEDUPE_SINK_TEST")
+    "or @BQ_UPDATE_SINK_DEDUPE_TEST or @BQ_UPSERT_SOURCE_TEST or @BQ_UPSERT_SINK_TEST or @BQ_NULL_MODE_SOURCE_TEST " +
+    "or @BQ_UPSERT_DEDUPE_SOURCE_TEST or @BQ_UPSERT_DEDUPE_SINK_TEST")
   public static void deleteTempSourceBQTable() throws IOException, InterruptedException {
     BigQueryClient.dropBqQuery(bqSourceTable);
     PluginPropertyUtils.removePluginProp("bqSourceTable");
