@@ -1131,4 +1131,62 @@ public class TestSetupHooks {
     PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
     BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " created successfully");
   }
+
+  @Before(order = 1, value = "@BQ_RECORD_SOURCE_TEST")
+  public static void createSourceBQRecordTable() throws IOException, InterruptedException {
+    bqSourceTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSourceTable + "` " +
+                                                          "(ID INT64, Name STRING, " + "Price FLOAT64," +
+                                                          "TableName STRING ) ");
+    try {
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSourceTable + "` " +
+                                                            "(ID,  Name, Price, TableName)" +
+                                                            "VALUES" + "(1, 'string_1', 0.1, Test),");
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+    PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
+    BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " created successfully");
+  }
+
+  @Before(order = 1, value = "@BQ_RECORD_SINK_TEST")
+  public static void createSinkBQRecordTable() throws IOException, InterruptedException {
+    bqTargetTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
+    BeforeActions.scenario.write("BQ target table name - " + bqTargetTable);
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqTargetTable + "` " +
+                                                          "(ID INT64, Name STRING, " + "Price FLOAT64,");
+    try {
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqTargetTable + "` " +
+                                                            "(ID,  Name, Price)" +
+                                                            "VALUES" + "(1, 'string_1', 0.1)");
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+    PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
+    BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " created successfully");
+  }
+
+  @Before(order = 1, value = "@BQ_INSERT_SINK_TEST")
+  public static void createSinkBQInsertTable() throws IOException, InterruptedException {
+
+    bqTargetTable = "E2E_TARGET_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
+    BeforeActions.scenario.write("BQ Target table name - " + bqTargetTable);
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqTargetTable + "` " +
+                                                          "(ID INT64,Name STRING," +
+                                                          "id_Value INT64, Customer_Exists BOOL ) ");
+    try {
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqTargetTable + "` " +
+                                                            "(ID,  Name, id_Value, Customer_Exists)" +
+                                                            "VALUES" + "(3, 'Rajan Kumar', 100, true)");
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+    }
+    PluginPropertyUtils.addPluginProp(" bqTargetTable", bqTargetTable);
+    BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " updated successfully");
+  }
 }

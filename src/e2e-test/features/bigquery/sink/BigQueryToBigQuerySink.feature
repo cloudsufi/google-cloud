@@ -502,4 +502,75 @@ Feature: BigQuery sink - Verification of BigQuery to BigQuery successful data tr
     Then Open and capture logs
     Then Close the pipeline logs
     Then Verify the pipeline status is "Succeeded"
-    Then Validate the data transferred from BigQuery to BigQuery with actual And expected file for: "bqUpsertExpectedFile"
+    Then Validate the data transferred from BigQuery to BigQuery with actual And expected file for: "bqUpsertDedupeFile"
+
+  @BQ_RECORD_SOURCE_TEST @BQ_RECORD_SINK_TEST
+  Scenario: Validate successful record transfer from two BigQuery source plugins with different schema record names, taking one extra column in BigQuery source plugin 1,and
+  using wrangler transformation plugin for removing the extra column and transferring the data in BigQuery sink plugin containing all the columns from both the source plugin.
+    Given Open Datafusion Project to configure pipeline
+    Then Click on the Plus Green Button to import the pipelines
+    Then Select the file for importing the pipeline for the plugin "Directive_Drop"
+    Then Navigate to the properties page of plugin: "BigQuery"
+    Then Replace input plugin property: "project" with value: "projectId"
+    Then Replace input plugin property: "dataset" with value: "dataset"
+    Then Replace input plugin property: "table" with value: "bqSourceTable"
+    Then Click on the Get Schema button
+    Then Click on the Validate button
+    Then Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "BigQuery3"
+    Then Replace input plugin property: "project" with value: "projectId"
+    Then Replace input plugin property: "table" with value: "bqTargetTable"
+    Then Replace input plugin property: "dataset" with value: "dataset"
+    Then Click on the Validate button
+    Then Close the Plugin Properties page
+    Then Rename the pipeline
+    Then Deploy the pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Verify the pipeline status is "Succeeded"
+    Then Close the pipeline logs
+    Then Validate the data transferred from BigQuery to BigQuery with actual And expected file for: "bqDifferentRecordFile"
+
+  @BQ_INSERT_INT_SOURCE_TEST @BQ_INSERT_SINK_TEST @CDAP-20830
+  Scenario:Validate successful records transfer from BigQuery to BigQuery with Advanced operations Insert with table existing in both source and sink plugin and update table schema to true.
+    Given Open Datafusion Project to configure pipeline
+    When Expand Plugin group in the LHS plugins list: "Source"
+    When Select plugin: "BigQuery" from the plugins list as: "Source"
+    When Expand Plugin group in the LHS plugins list: "Sink"
+    When Select plugin: "BigQuery" from the plugins list as: "Sink"
+    Then Connect plugins: "BigQuery" and "BigQuery2" to establish connection
+    Then Navigate to the properties page of plugin: "BigQuery"
+    And Replace input plugin property: "project" with value: "projectId"
+    Then Override Service account details if set in environment variables
+    And Replace input plugin property: "datasetProject" with value: "datasetprojectId"
+    And Replace input plugin property: "referenceName" with value: "reference"
+    And Replace input plugin property: "dataset" with value: "dataset"
+    And Replace input plugin property: "table" with value: "bqSourceTable"
+    Then Click on the Get Schema button
+    Then Validate "BigQuery" plugin properties
+    And Close the Plugin Properties page
+    Then Navigate to the properties page of plugin: "BigQuery2"
+    Then Replace input plugin property: "project" with value: "projectId"
+    Then Override Service account details if set in environment variables
+    Then Enter input plugin property: "datasetProject" with value: "projectId"
+    Then Enter input plugin property: "referenceName" with value: "BQReferenceName"
+    Then Enter input plugin property: "dataset" with value: "dataset"
+    Then Enter input plugin property: "table" with value: "bqTargetTable"
+    And Select radio button plugin property: "operation" with value: "insert"
+    Then Click plugin property: "updateTableSchema"
+    Then Validate "BigQuery" plugin properties
+    And Close the Plugin Properties page
+    Then Save the pipeline
+    Then Preview and run the pipeline
+    Then Wait till pipeline preview is in running state
+    Then Open and capture pipeline preview logs
+    Then Verify the preview run status of pipeline in the logs is "succeeded"
+    Then Close the pipeline logs
+    Then Close the preview
+    Then Deploy the pipeline
+    Then Run the Pipeline in Runtime
+    Then Wait till pipeline is in running state
+    Then Open and capture logs
+    Then Close the pipeline logs
+    Then Verify the pipeline status is "Succeeded"
