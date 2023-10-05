@@ -942,6 +942,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " created successfully");
@@ -962,6 +963,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
     BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " created successfully");
@@ -983,6 +985,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp(" bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " updated successfully");
@@ -1004,6 +1007,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp(" bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " updated successfully");
@@ -1025,6 +1029,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp(" bqTargetTable", bqTargetTable);
     BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " updated successfully");
@@ -1044,6 +1049,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp(" bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " updated successfully");
@@ -1065,6 +1071,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp(" bqTargetTable", bqTargetTable);
     BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " updated successfully");
@@ -1086,6 +1093,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp(" bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " updated successfully");
@@ -1106,6 +1114,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " created successfully");
@@ -1127,6 +1136,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
     BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " created successfully");
@@ -1141,32 +1151,14 @@ public class TestSetupHooks {
     try {
       io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSourceTable + "` " +
                                                             "(ID,  Name, Price, TableName)" +
-                                                            "VALUES" + "(1, 'string_1', 0.1, Test),");
+                                                            "VALUES" + "(1, 'string_1', 0.1, 'Test')");
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " created successfully");
-  }
-
-  @Before(order = 1, value = "@BQ_RECORD_SINK_TEST")
-  public static void createSinkBQRecordTable() throws IOException, InterruptedException {
-    bqTargetTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
-    PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
-    BeforeActions.scenario.write("BQ target table name - " + bqTargetTable);
-    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqTargetTable + "` " +
-                                                          "(ID INT64, Name STRING, " + "Price FLOAT64,");
-    try {
-      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqTargetTable + "` " +
-                                                            "(ID,  Name, Price)" +
-                                                            "VALUES" + "(1, 'string_1', 0.1)");
-    } catch (NoSuchElementException e) {
-      // Insert query does not return any record.
-      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
-    }
-    PluginPropertyUtils.addPluginProp("bqTargetTable", bqTargetTable);
-    BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " created successfully");
   }
 
   @Before(order = 1, value = "@BQ_INSERT_SINK_TEST")
@@ -1185,6 +1177,7 @@ public class TestSetupHooks {
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
       // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
     }
     PluginPropertyUtils.addPluginProp(" bqTargetTable", bqTargetTable);
     BeforeActions.scenario.write("BQ Target Table " + bqTargetTable + " updated successfully");

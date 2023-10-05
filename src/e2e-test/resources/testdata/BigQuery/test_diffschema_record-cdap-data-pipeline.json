@@ -1,5 +1,5 @@
 {
-    "name": "TestPipeline-different_schema_record_name",
+    "name": "test_diffschema_record",
     "description": "Data Pipeline Application",
     "artifact": {
         "name": "cdap-data-pipeline",
@@ -48,17 +48,17 @@
                     },
                     "properties": {
                         "useConnection": "false",
-                        "dataset": "bq_automation",
-                        "table": "E2E_SOURCE_8b10bfe3_69aa_4e64_9f12_7b2d20408007",
-                        "enableQueryingViews": "false",
-                        "schema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"PersonID\",\"type\":[\"long\",\"null\"]},{\"name\":\"LastName\",\"type\":[\"string\",\"null\"]},{\"name\":\"TableName\",\"type\":[\"string\",\"null\"]},{\"name\":\"FirstName\",\"type\":[\"string\",\"null\"]}]}",
-                        "referenceName": "bq_test",
                         "project": "cdf-athena",
                         "serviceAccountType": "filePath",
-                        "serviceFilePath": "auto-detect"
+                        "serviceFilePath": "auto-detect",
+                        "referenceName": "bq_ref",
+                        "dataset": "bq_automation",
+                        "table": "bqSourceTableMore",
+                        "enableQueryingViews": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]},{\"name\":\"TableName\",\"type\":[\"string\",\"null\"]}]}"
                     }
                 },
-                "outputSchema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"PersonID\",\"type\":[\"long\",\"null\"]},{\"name\":\"LastName\",\"type\":[\"string\",\"null\"]},{\"name\":\"TableName\",\"type\":[\"string\",\"null\"]},{\"name\":\"FirstName\",\"type\":[\"string\",\"null\"]}]}",
+                "outputSchema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]},{\"name\":\"TableName\",\"type\":[\"string\",\"null\"]}]}",
                 "id": "BigQuery",
                 "type": "batchsource",
                 "label": "BigQuery",
@@ -80,15 +80,15 @@
                         "precondition": "false",
                         "directives": "drop :TableName",
                         "on-error": "fail-pipeline",
-                        "schema": "{\"type\":\"record\",\"name\":\"record\",\"fields\":[{\"name\":\"PersonID\",\"type\":[\"long\",\"null\"]},{\"name\":\"LastName\",\"type\":[\"string\",\"null\"]},{\"name\":\"FirstName\",\"type\":[\"string\",\"null\"]}]}",
-                        "workspaceId": "2abae976-cfe2-4b19-9885-76119b261628"
+                        "schema": "{\"type\":\"record\",\"name\":\"record\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]}]}",
+                        "workspaceId": "7038fc39-732e-4d75-8d3f-db6cfe5a11d8"
                     }
                 },
-                "outputSchema": "{\"type\":\"record\",\"name\":\"record\",\"fields\":[{\"name\":\"PersonID\",\"type\":[\"long\",\"null\"]},{\"name\":\"LastName\",\"type\":[\"string\",\"null\"]},{\"name\":\"FirstName\",\"type\":[\"string\",\"null\"]}]}",
+                "outputSchema": "{\"type\":\"record\",\"name\":\"record\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]}]}",
                 "inputSchema": [
                     {
                         "name": "BigQuery",
-                        "schema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"PersonID\",\"type\":[\"long\",\"null\"]},{\"name\":\"LastName\",\"type\":[\"string\",\"null\"]},{\"name\":\"TableName\",\"type\":[\"string\",\"null\"]},{\"name\":\"FirstName\",\"type\":[\"string\",\"null\"]}]}"
+                        "schema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]},{\"name\":\"TableName\",\"type\":[\"string\",\"null\"]}]}"
                     }
                 ],
                 "id": "Wrangler",
@@ -109,31 +109,30 @@
                     },
                     "properties": {
                         "useConnection": "false",
-                        "project": "cdf-athena",
-                        "datasetProject": "cdf-athena",
+                        "project": "auto-detect",
                         "serviceAccountType": "filePath",
                         "serviceFilePath": "auto-detect",
-                        "referenceName": "BQReferenceName",
                         "dataset": "bq_automation",
-                        "table": "E2E_TARGET_e4ce8239_51d2_44ce_b40d_03a45fb3d0c1",
+                        "table": "New_target_table_combine",
                         "operation": "insert",
                         "truncateTable": "false",
                         "allowSchemaRelaxation": "false",
                         "location": "US",
                         "createPartitionedTable": "false",
                         "partitioningType": "TIME",
-                        "partitionFilterRequired": "false"
+                        "partitionFilterRequired": "false",
+                        "schema": "{\"type\":\"record\",\"name\":\"record\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]}]}"
                     }
                 },
-                "outputSchema": "",
+                "outputSchema": "{\"type\":\"record\",\"name\":\"record\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]}]}",
                 "inputSchema": [
                     {
                         "name": "Wrangler",
-                        "schema": "{\"type\":\"record\",\"name\":\"record\",\"fields\":[{\"name\":\"PersonID\",\"type\":[\"long\",\"null\"]},{\"name\":\"LastName\",\"type\":[\"string\",\"null\"]},{\"name\":\"FirstName\",\"type\":[\"string\",\"null\"]}]}"
+                        "schema": "{\"type\":\"record\",\"name\":\"record\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]}]}"
                     },
                     {
                         "name": "BigQuery2",
-                        "schema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"PersonID\",\"type\":[\"long\",\"null\"]},{\"name\":\"LastName\",\"type\":[\"string\",\"null\"]},{\"name\":\"FirstName\",\"type\":[\"string\",\"null\"]}]}"
+                        "schema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]}]}"
                     }
                 ],
                 "id": "BigQuery3",
@@ -155,17 +154,16 @@
                     "properties": {
                         "useConnection": "false",
                         "project": "cdf-athena",
-                        "datasetProject": "cdf-athena",
                         "serviceAccountType": "filePath",
                         "serviceFilePath": "auto-detect",
-                        "referenceName": "BQReferenceName",
+                        "referenceName": "bq_test",
                         "dataset": "bq_automation",
-                        "table": "E2E_SOURCE_b376983f_78c4_4476_ac1d_668a462ec24f",
+                        "table": "bqSourceTableLess",
                         "enableQueryingViews": "false",
-                        "schema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"PersonID\",\"type\":[\"long\",\"null\"]},{\"name\":\"LastName\",\"type\":[\"string\",\"null\"]},{\"name\":\"FirstName\",\"type\":[\"string\",\"null\"]}]}"
+                        "schema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]}]}"
                     }
                 },
-                "outputSchema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"PersonID\",\"type\":[\"long\",\"null\"]},{\"name\":\"LastName\",\"type\":[\"string\",\"null\"]},{\"name\":\"FirstName\",\"type\":[\"string\",\"null\"]}]}",
+                "outputSchema": "{\"type\":\"record\",\"name\":\"output\",\"fields\":[{\"name\":\"ID\",\"type\":[\"long\",\"null\"]},{\"name\":\"Name\",\"type\":[\"string\",\"null\"]},{\"name\":\"Price\",\"type\":[\"double\",\"null\"]}]}",
                 "id": "BigQuery2",
                 "type": "batchsource",
                 "label": "BigQuery2",
@@ -181,5 +179,5 @@
         },
         "maxConcurrentRuns": 1
     },
-    "version": "ab96ef7c-6282-11ee-9839-000000109afb"
+    "version": "fe4ee1e3-6380-11ee-8217-0000003390c8"
 }

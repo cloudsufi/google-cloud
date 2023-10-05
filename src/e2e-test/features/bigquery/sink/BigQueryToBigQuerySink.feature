@@ -504,7 +504,7 @@ Feature: BigQuery sink - Verification of BigQuery to BigQuery successful data tr
     Then Verify the pipeline status is "Succeeded"
     Then Validate the data transferred from BigQuery to BigQuery with actual And expected file for: "bqUpsertDedupeFile"
 
-  @BQ_RECORD_SOURCE_TEST @BQ_RECORD_SINK_TEST
+  @BQ_RECORD_SOURCE_TEST @BQ_SINK_TEST
   Scenario: Validate successful record transfer from two BigQuery source plugins with different schema record names, taking one extra column in BigQuery source plugin 1,and
   using wrangler transformation plugin for removing the extra column and transferring the data in BigQuery sink plugin containing all the columns from both the source plugin.
     Given Open Datafusion Project to configure pipeline
