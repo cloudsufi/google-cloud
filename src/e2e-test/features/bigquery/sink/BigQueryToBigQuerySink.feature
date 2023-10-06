@@ -574,4 +574,3 @@ Feature: BigQuery sink - Verification of BigQuery to BigQuery successful data tr
     Then Open and capture logs
     Then Close the pipeline logs
     Then Verify the pipeline status is "Succeeded"
-
