@@ -25,6 +25,7 @@ import org.junit.Assert;
 import stepsdesign.BeforeActions;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * BigQuery Plugin validation common step design.
@@ -43,5 +44,14 @@ public class BigQuery {
       TestSetupHooks.bqSourceTable, TestSetupHooks.bqTargetTable);
     Assert.assertTrue("Value of records transferred to the BQ sink should be equal to the value " +
                         "of the records in the source table", recordsMatched);
+  }
+
+  @Then("Validate the data transferred from BigQuery to BigQuery with actual And expected file for: {string}")
+  public void validateTheDataFromBQToBQWithActualAndExpectedFileFor(String expectedFile) throws IOException,
+    InterruptedException, URISyntaxException {
+    boolean recordsMatched = BQValidationExistingTables.validateActualDataToExpectedData(
+      PluginPropertyUtils.pluginProp("bqTargetTable"),
+      PluginPropertyUtils.pluginProp(expectedFile));
+    Assert.assertTrue("Value of records in actual and expected file is equal", recordsMatched);
   }
 }
