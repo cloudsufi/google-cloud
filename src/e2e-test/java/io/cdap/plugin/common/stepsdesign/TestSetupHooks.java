@@ -1123,7 +1123,7 @@ public class TestSetupHooks {
       io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSourceTable + "` " +
                                                             "(ID,  Name, Price, Customer_Exists)" +
                                                             "VALUES" + "(1, 'string_1', 0.1, true)," +
-                                                            "(2, 'string_1', 0.2, false)" +
+                                                            "(2, 'string_1', 0.2, false)," +
                                                             "(3, 'string_3', 0.3, false)");
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.
@@ -1145,7 +1145,7 @@ public class TestSetupHooks {
     try {
       io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqTargetTable + "` " +
                                                             "(ID,  Name, Price, Customer_Exists)" +
-                                                            "VALUES" + "(0, 'string_0', 0, true)" +
+                                                            "VALUES" + "(0, 'string_0', 0, true)," +
                                                             "(10, 'string_1', 1.1, false)");
     } catch (NoSuchElementException e) {
       // Insert query does not return any record.

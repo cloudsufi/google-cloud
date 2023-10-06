@@ -38,7 +38,7 @@ public class BQValidationExistingTables {
     InterruptedException, URISyntaxException {
     Map<String, JsonObject> bigQueryMap = new HashMap<>();
     Map<String, JsonObject> fileMap = new HashMap<>();
-    Path  bqExpectedFilePath = Paths.get(BQValidationExistingTables.class.getResource("/" + fileName).toURI());
+    Path bqExpectedFilePath = Paths.get(BQValidationExistingTables.class.getResource("/" + fileName).toURI());
 
     getBigQueryTableData(table, bigQueryMap);
     getFileData(bqExpectedFilePath.toString(), fileMap);
@@ -113,4 +113,4 @@ public class BQValidationExistingTables {
       return null;
     }
   }
-  }
+}
