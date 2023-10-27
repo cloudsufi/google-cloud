@@ -398,6 +398,10 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
                    @Nullable String rowAsArguments, @Nullable Boolean retryOnBackendError,
                    @Nullable Long initialRetryDuration, @Nullable Long maxRetryDuration,
                    @Nullable Double retryMultiplier, @Nullable Integer maxRetryCount) {
+                   @Nullable String mode, @Nullable Boolean storeResults, @Nullable String jobLabelKeyValue,
+                   @Nullable String rowAsArguments, @Nullable Boolean retryOnBackendError,
+                   @Nullable Long initialRetryDuration, @Nullable Long maxRetryDuration,
+                   @Nullable Double retryMultiplier, @Nullable Integer maxRetryCount) {
       this.project = project;
       this.serviceAccountType = serviceAccountType;
       this.serviceFilePath = serviceFilePath;
@@ -413,6 +417,11 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
       this.storeResults = storeResults;
       this.jobLabelKeyValue = jobLabelKeyValue;
       this.jobLabelKeyValue = jobLabelKeyValue;
+      this.retryOnBackendError = retryOnBackendError;
+      this.initialRetryDuration = initialRetryDuration;
+      this.maxRetryDuration = maxRetryDuration;
+      this.maxRetryCount = maxRetryCount;
+      this.retryMultiplier = retryMultiplier;
       this.retryOnBackendError = retryOnBackendError;
       this.initialRetryDuration = initialRetryDuration;
       this.maxRetryDuration = maxRetryDuration;
@@ -486,6 +495,26 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
     @Nullable
     public String getJobLabelKeyValue() {
       return jobLabelKeyValue;
+    }
+
+    public boolean getRetryOnBackendError() {
+      return retryOnBackendError == null || retryOnBackendError;
+    }
+
+    public long getInitialRetryDuration() {
+      return initialRetryDuration == null ? DEFAULT_INITIAL_RETRY_DURATION_SECONDS : initialRetryDuration;
+    }
+
+    public long getMaxRetryDuration() {
+      return maxRetryDuration == null ? DEFULT_MAX_RETRY_DURATION_SECONDS : maxRetryDuration;
+    }
+
+    public double getRetryMultiplier() {
+      return retryMultiplier == null ? DEFAULT_RETRY_MULTIPLIER : retryMultiplier;
+    }
+
+    public int getMaxRetryCount() {
+      return maxRetryCount == null ? DEFAULT_MAX_RETRY_COUNT : maxRetryCount;
     }
 
     @Override
@@ -563,6 +592,45 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
 
     void validateJobLabelKeyValue(FailureCollector failureCollector) {
       BigQueryUtil.validateJobLabelKeyValue(jobLabelKeyValue, failureCollector, NAME_BQ_JOB_LABELS);
+    }
+
+    void validateRetryConfiguration(FailureCollector failureCollector, Long initialRetryDuration,
+                                    Long maxRetryDuration, Integer maxRetryCount, Double retryMultiplier) {
+      if (initialRetryDuration != null && initialRetryDuration <= 0) {
+        failureCollector.addFailure("Initial retry duration must be greater than 0.",
+                        "Please specify a valid initial retry duration.")
+                .withConfigProperty(NAME_INITIAL_RETRY_DURATION);
+      }
+      if (maxRetryDuration != null && maxRetryDuration <= 0) {
+        failureCollector.addFailure("Max retry duration must be greater than 0.",
+                        "Please specify a valid max retry duration.")
+                .withConfigProperty(NAME_MAX_RETRY_DURATION);
+      }
+      if (maxRetryCount != null && maxRetryCount <= 0) {
+        failureCollector.addFailure("Max retry count must be greater than 0.",
+                        "Please specify a valid max retry count.")
+                .withConfigProperty(NAME_MAX_RETRY_COUNT);
+      }
+      if (retryMultiplier != null && retryMultiplier <= 1) {
+        failureCollector.addFailure("Retry multiplier must be strictly greater than 1.",
+                        "Please specify a valid retry multiplier.")
+                .withConfigProperty(NAME_RETRY_MULTIPLIER);
+      }
+      if (maxRetryDuration != null && initialRetryDuration != null && maxRetryDuration <= initialRetryDuration) {
+        failureCollector.addFailure("Max retry duration must be greater than initial retry duration.",
+                        "Please specify a valid max retry duration.")
+                .withConfigProperty(NAME_MAX_RETRY_DURATION);
+      }
+      // Verify retry configuration when retry on backend error is enabled and none of the retry configuration
+      // properties are macros.
+      if (!containsMacro(NAME_RETRY_ON_BACKEND_ERROR) && retryOnBackendError != null && retryOnBackendError &&
+          !containsMacro(NAME_INITIAL_RETRY_DURATION) && !containsMacro(NAME_MAX_RETRY_DURATION) &&
+          !containsMacro(NAME_MAX_RETRY_COUNT) && !containsMacro(NAME_RETRY_MULTIPLIER)) {
+          validateRetryConfiguration(
+            failureCollector, initialRetryDuration, maxRetryDuration, maxRetryCount, retryMultiplier
+          );
+      }
+      failureCollector.getOrThrowException();
     }
 
     void validateRetryConfiguration(FailureCollector failureCollector, Long initialRetryDuration,
@@ -772,6 +840,36 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
         return this;
       }
 
+      public Builder setRetryOnBackendError(@Nullable Boolean retryOnBackendError) {
+        this.retryOnBackendError = retryOnBackendError;
+        return this;
+      }
+
+      public Builder setStoreResults(@Nullable Boolean storeResults) {
+        this.storeResults = storeResults;
+        return this;
+      }
+
+      public Builder setInitialRetryDuration(@Nullable Long initialRetryDuration) {
+        this.initialRetryDuration = initialRetryDuration;
+        return this;
+      }
+
+      public Builder setMaxRetryDuration(@Nullable Long maxRetryDuration) {
+        this.maxRetryDuration = maxRetryDuration;
+        return this;
+      }
+
+      public Builder setMaxRetryCount(@Nullable Integer maxRetryCount) {
+        this.maxRetryCount = maxRetryCount;
+        return this;
+      }
+
+      public Builder setRetryMultiplier(@Nullable Double retryMultiplier) {
+        this.retryMultiplier = retryMultiplier;
+        return this;
+      }
+
       public Config build() {
         return new Config(
           project,
@@ -788,6 +886,13 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
           storeResults,
           jobLabelKeyValue
           storeResults,
+          jobLabelKeyValue,
+          rowAsArguments,
+          retryOnBackendError,
+          initialRetryDuration,
+          maxRetryDuration,
+          retryMultiplier,
+          maxRetryCount
           jobLabelKeyValue,
           rowAsArguments,
           retryOnBackendError,
