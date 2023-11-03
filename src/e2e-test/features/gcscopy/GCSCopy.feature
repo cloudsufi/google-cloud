@@ -15,7 +15,7 @@
 @GCSCopy
 Feature:GCSCopy - Verification of successful objects copy from one bucket to another
 
-  @CMEK @GCS_CSV_TEST @GCS_SINK_TEST
+  @CMEK @GCS_CSV_TEST @GCS_SINK_TEST @GCSCopy_Required
   Scenario:Validate successful copy object from one bucket to another new bucket along with data validation with default subdirectory and overwrite toggle button as false.
     Given Open Datafusion Project to configure pipeline
     When Expand Plugin group in the LHS plugins list: "Conditions and Actions"
@@ -104,7 +104,7 @@ Feature:GCSCopy - Verification of successful objects copy from one bucket to ano
     Then Validate GCSCopy successfully copies object "gcsCsvFile" to destination bucket
     Then Validate the data of GCS Copy source bucket and destination bucket "gcsCopyCsvExpectedFilePath"
 
-  @GCS_CSV_TEST @GCS_SINK_EXISTING_BUCKET_TEST
+  @GCS_CSV_TEST @GCS_SINK_EXISTING_BUCKET_TEST @GCSCopy_Required
   Scenario: Validate successful copy objects from one bucket to another existing bucket with Overwrite Existing Files set to false along with data validation.
     Given Open Datafusion Project to configure pipeline
     When Expand Plugin group in the LHS plugins list: "Conditions and Actions"
@@ -127,7 +127,7 @@ Feature:GCSCopy - Verification of successful objects copy from one bucket to ano
     Then Validate GCSCopy failed to copy object "gcsCsvFile" to destination bucket
     Then Validate the data of GCS Copy source bucket and destination bucket "gcsCopyCsvExpectedFilePath"
 
-  @GCS_CSV_TEST @GCS_SINK_TEST
+  @GCS_CSV_TEST @GCS_SINK_TEST @GCSCopy_Required
   Scenario:Validate successful Copy object from one bucket to another new bucket with location set to non-default value
     Given Open Datafusion Project to configure pipeline
     When Expand Plugin group in the LHS plugins list: "Conditions and Actions"
