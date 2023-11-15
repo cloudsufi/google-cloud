@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
   features = {"src/e2e-test/features"},
   glue = {"io.cdap.plugin.gcs.stepsdesign", "io.cdap.plugin.bigquery.stepsdesign",
     "stepsdesign", "io.cdap.plugin.common.stepsdesign"},
-  tags = {"@GCS_Source_Required"},
+  tags = {"@GCS_Source_Requiredd"},
   monochrome = true,
   plugin = {"pretty", "html:target/cucumber-html-report/gcs-source-required",
     "json:target/cucumber-reports/cucumber-gcs-source-required.json",
