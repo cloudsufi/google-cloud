@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
     "io.cdap.plugin.common.stepsdesign", "io.cdap.plugin.pubsub.stepsdesign",
     "io.cdap.plugin.gcsmove.stepsdesign", "io.cdap.plugin.spanner.stepsdesign",
     "io.cdap.plugin.gcsdelete.stepsdesign"},
-  tags = {"@Required"},
+  tags = {"@Requiredd"},
   plugin = {"pretty", "html:target/cucumber-html-report/required",
     "json:target/cucumber-reports/cucumber-required.json",
     "junit:target/cucumber-reports/cucumber-required.xml"},
