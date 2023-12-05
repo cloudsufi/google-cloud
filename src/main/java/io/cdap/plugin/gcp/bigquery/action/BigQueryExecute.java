@@ -393,6 +393,7 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
     private Config(@Nullable String project, @Nullable String serviceAccountType, @Nullable String serviceFilePath,
                    @Nullable String serviceAccountJson, @Nullable String dataset, @Nullable String table,
                    @Nullable String location, @Nullable String cmekKey, @Nullable String dialect, @Nullable String sql,
+                   @Nullable String mode, @Nullable Boolean storeResults, @Nullable String jobLabelKeyValue) {
                    @Nullable String mode, @Nullable Boolean storeResults, @Nullable String jobLabelKeyValue,
                    @Nullable String rowAsArguments, @Nullable Boolean retryOnBackendError,
                    @Nullable Long initialRetryDuration, @Nullable Long maxRetryDuration,
@@ -410,6 +411,7 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
       this.mode = mode;
       this.rowAsArguments = rowAsArguments;
       this.storeResults = storeResults;
+      this.jobLabelKeyValue = jobLabelKeyValue;
       this.jobLabelKeyValue = jobLabelKeyValue;
       this.retryOnBackendError = retryOnBackendError;
       this.initialRetryDuration = initialRetryDuration;
@@ -481,6 +483,11 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
       return maxRetryCount == null ? DEFAULT_MAX_RETRY_COUNT : maxRetryCount;
     }
 
+    @Nullable
+    public String getJobLabelKeyValue() {
+      return jobLabelKeyValue;
+    }
+
     @Override
     public void validate(FailureCollector failureCollector) {
       validate(failureCollector, Collections.emptyMap());
@@ -533,6 +540,10 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
         validateJobLabelKeyValue(failureCollector);
       }
 
+      if (!containsMacro(NAME_BQ_JOB_LABELS)) {
+        validateJobLabelKeyValue(failureCollector);
+      }
+
       failureCollector.getOrThrowException();
     }
 
@@ -548,6 +559,10 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
           );
       }
       failureCollector.getOrThrowException();
+    }
+
+    void validateJobLabelKeyValue(FailureCollector failureCollector) {
+      BigQueryUtil.validateJobLabelKeyValue(jobLabelKeyValue, failureCollector, NAME_BQ_JOB_LABELS);
     }
 
     void validateRetryConfiguration(FailureCollector failureCollector, Long initialRetryDuration,
@@ -722,6 +737,11 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
         return this;
       }
 
+      public Builder setJobLabelKeyValue(@Nullable String jobLabelKeyValue) {
+        this.jobLabelKeyValue = jobLabelKeyValue;
+        return this;
+      }
+
       public Builder setRetryOnBackendError(@Nullable Boolean retryOnBackendError) {
         this.retryOnBackendError = retryOnBackendError;
         return this;
@@ -765,6 +785,8 @@ public final class BigQueryExecute extends AbstractBigQueryAction {
           dialect,
           sql,
           mode,
+          storeResults,
+          jobLabelKeyValue
           storeResults,
           jobLabelKeyValue,
           rowAsArguments,
