@@ -15,7 +15,7 @@
 @BQMT_SINK
 Feature: BigQueryMultiTable sink -Verification of MultipleDatabaseTable to BigQueryMultiTable successful data transfer
 
-  @MULTIPLEDATABASETABLE_SOURCE_TEST @BQMT_Required @PLUGIN-1669
+  @DEBUG
   Scenario:Verify data is getting transferred from Multiple Database Tables to BQMT sink with all datatypes
     Given Open Datafusion Project to configure pipeline
     When Expand Plugin group in the LHS plugins list: "Source"
