@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 Cask Data, Inc.
+ * Copyright © 2024 Cask Data, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,7 +19,6 @@ package io.cdap.plugin.utils;
 import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutureCallback;
 import com.google.api.core.ApiFutures;
-import com.google.api.gax.rpc.AlreadyExistsException;
 import com.google.api.gax.rpc.ApiException;
 import com.google.cloud.pubsub.v1.AckReplyConsumer;
 import com.google.cloud.pubsub.v1.MessageReceiver;
@@ -30,16 +29,18 @@ import com.google.cloud.pubsub.v1.SubscriptionAdminSettings;
 import com.google.cloud.pubsub.v1.TopicAdminClient;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.ByteString;
+import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.PushConfig;
 import com.google.pubsub.v1.Topic;
 import com.google.pubsub.v1.TopicName;
 import io.cdap.e2e.utils.ConstantsUtil;
 import io.cdap.e2e.utils.PluginPropertyUtils;
-import com.google.pubsub.v1.ProjectSubscriptionName;
+import io.grpc.StatusRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -49,6 +50,8 @@ import java.util.concurrent.TimeoutException;
  */
 public class PubSubClient {
 
+  private static final Logger logger = LoggerFactory.getLogger(PubSubClient.class);
+
   public static Topic createTopic(String topicId) throws IOException {
     try (TopicAdminClient topicAdminClient = TopicAdminClient.create()) {
       TopicName topicName = TopicName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), topicId);
@@ -56,18 +59,24 @@ public class PubSubClient {
     }
   }
 
-  // Create the subscription
+  /**
+   * Create the subscription.
+   */
   public static void createSubscription(String subscriptionId, String topicId) throws IOException {
     ProjectSubscriptionName subscriptionName = null;
     try (SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient.create(
       SubscriptionAdminSettings.newBuilder().build())) {
       TopicName topicName = TopicName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), topicId);
-      subscriptionName = ProjectSubscriptionName.of(ConstantsUtil.PROJECT_ID, subscriptionId);
+      subscriptionName = ProjectSubscriptionName.of
+        (PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), subscriptionId);
       subscriptionAdminClient.createSubscription(subscriptionName, topicName, PushConfig.getDefaultInstance(), 60);
-      System.out.println("Subscription created: " + subscriptionName.toString());
-    } catch (AlreadyExistsException e) {
-      assert subscriptionName != null;
-      System.out.println("Subscription already exists: " + subscriptionName.toString());
+      logger.info("Subscription created: " + subscriptionName.toString());
+    } catch (StatusRuntimeException e) {
+      if ("ALREADY_EXISTS".equals(e.getStatus().getCode().name())) {
+        logger.info("Subscription already exists: {}", subscriptionName.toString());
+      } else {
+        logger.info("Error creating subscription", e);
+      }
     }
   }
 
@@ -92,48 +101,50 @@ public class PubSubClient {
   }
 
 
-  public static void publishWithErrorHandlerExample(String projectId, String topicId)
-      throws IOException, InterruptedException {
+  public static void publishMessagesWithPubSub(String projectId, String topicId, List<String> dataMessages)
+    throws IOException, InterruptedException {
     TopicName topicName = TopicName.of(projectId, topicId);
     Publisher publisher = null;
-
     try {
       publisher = Publisher.newBuilder(topicName).build();
-
-      List<String> messages = Arrays.asList("first message", "second message");
-
-      for (final String message : messages) {
+      for (final String message : dataMessages) {
         ByteString data = ByteString.copyFromUtf8(message);
         PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
         ApiFuture<String> future = publisher.publish(pubsubMessage);
 
-        // Adding an asynchronous callback to handle success / failure
-        ApiFutures.addCallback(
-            future,
-            new ApiFutureCallback<String>() {
+    /**
+     * Adding an asynchronous callback to handle success / failure.
+     */
+    ApiFutures.addCallback( future,
+    new ApiFutureCallback<String>() {
 
-              @Override
-              public void onFailure(Throwable throwable) {
-                if (throwable instanceof ApiException) {
-                  ApiException apiException = ((ApiException) throwable);
-                  // details on the API exception
-                  // System.out.println(apiException.getStatusCode().getCode());
-                  //System.out.println(apiException.isRetryable());
-                }
-                System.out.println("Error publishing message : " + message);
-              }
-
-              @Override
-              public void onSuccess(String messageId) {
-                // Once published, returns server-assigned message ids (unique within the topic)
-                System.out.println("Published message ID: " + messageId);
-              }
-            },
-            MoreExecutors.directExecutor());
+    @Override
+    public void onFailure(Throwable throwable) {
+    if (throwable instanceof ApiException) {
+    ApiException apiException = ((ApiException) throwable);
+    /**
+    * details on the API exception.
+     */
+     logger.info(String.valueOf(apiException.getStatusCode().getCode()));
+     logger.info(String.valueOf(apiException.isRetryable()));
+    }
+     logger.info("Error publishing message : " + message);
+            }
+      @Override
+   public void onSuccess(String messageId) {
+    /**
+    * Once published, returns server-assigned message ids (unique within the topic).
+    */
+      logger.info("Published message ID: " + messageId);
+            }
+          },
+          MoreExecutors.directExecutor());
       }
     } finally {
       if (publisher != null) {
-        // When finished with the publisher, shutdown to free up resources.
+        /**
+         * When finished with the publisher, shutdown to free up resources.
+         */
         publisher.shutdown();
         publisher.awaitTermination(1, TimeUnit.MINUTES);
       }
@@ -141,33 +152,38 @@ public class PubSubClient {
   }
 
   public static void subscribeAsyncExample(String projectId, String subscriptionId) {
-    ProjectSubscriptionName subscriptionName =
-        ProjectSubscriptionName.of(projectId, subscriptionId);
-
-    // Instantiate an asynchronous message receiver.
+    ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(projectId, subscriptionId);
+    /**
+     * Instantiate an asynchronous message receiver.
+     */
     MessageReceiver receiver =
-        (PubsubMessage message, AckReplyConsumer consumer) -> {
-          // Handle incoming message, then ack the received message.
-          System.out.println("Id: " + message.getMessageId());
-          System.out.println("Data: " + message.getData().toStringUtf8());
-          consumer.ack();
-        };
+      (PubsubMessage message, AckReplyConsumer consumer) -> {
+        /**
+         *  Handle incoming message, then ack the received message.
+         */
+        logger.info("Id: " + message.getMessageId());
+        logger.info("Data: " + message.getData().toStringUtf8());
+        consumer.ack();
+      };
 
     Subscriber subscriber = null;
     try {
       subscriber = Subscriber.newBuilder(subscriptionName, receiver).build();
-      // Start the subscriber.
+      /**
+       * Start the subscriber.
+       */
       subscriber.startAsync().awaitRunning();
-      System.out.printf("Listening for messages on %s:\n", subscriptionName.toString());
-      // Allow the subscriber to run for 30s unless an unrecoverable error occurs.
-      subscriber.awaitTerminated(300, TimeUnit.SECONDS);
+      logger.info("Listening for messages on %s:\n", subscriptionName);
+      /**
+       * Allow the subscriber to run for 30s unless an unrecoverable error occurs.
+       */
+      subscriber.awaitTerminated(200, TimeUnit.SECONDS);
     } catch (TimeoutException timeoutException) {
-      // Shut down the subscriber after 30s. Stop receiving messages.
+      logger.error("Timeout exception: {e}");
+      /**
+       * Shut down the subscriber after 30s. Stop receiving messages.
+       */
       subscriber.stopAsync();
     }
   }
-
-
-
-
 }

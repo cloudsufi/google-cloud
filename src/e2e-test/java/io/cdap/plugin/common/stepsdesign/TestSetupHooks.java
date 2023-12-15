@@ -21,6 +21,7 @@ import com.google.cloud.storage.StorageException;
 import io.cdap.e2e.pages.actions.CdfConnectionActions;
 import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
 import io.cdap.e2e.utils.BigQueryClient;
+import io.cdap.e2e.utils.ConstantsUtil;
 import io.cdap.e2e.utils.PluginPropertyUtils;
 import io.cdap.e2e.utils.StorageClient;
 import io.cdap.plugin.utils.PubSubClient;
@@ -482,12 +483,6 @@ public class TestSetupHooks {
     return bucketName;
   }
 
-  @Before(order = 1, value = "@PUBSUB_SINK_TEST")
-  public static void createTargetPubSubTopic() {
-    pubSubTargetTopic = "cdf-e2e-test-" + UUID.randomUUID();
-    BeforeActions.scenario.write("Target PubSub topic " + pubSubTargetTopic);
-  }
-
   @Before(order = 1, value = "@PUBSUB_SOURCE_TEST")
   public static void createSourcePubSubTopic() throws IOException {
     pubSubSourceTopic = "cdf-e2e-test-" + UUID.randomUUID();
@@ -496,16 +491,31 @@ public class TestSetupHooks {
   }
 
   @Before(order = 1, value = "@PUBSUB_SUBSCRIPTION_TEST")
-  public static void createSubscriptionPubSubTopic() {
+  public static void createSubscriptionPubSubTopic() throws IOException {
     pubSubSourceSubscription = "cdf-e2e-test-" + UUID.randomUUID();
+    PubSubClient.createSubscription(pubSubSourceSubscription , pubSubSourceTopic);
     BeforeActions.scenario.write("Source PubSub subscription " + pubSubSourceSubscription);
   }
-  @After(order = 1, value = "")
+
+  @After(order = 1, value = "@PUBSUB_SOURCE_TEST")
   public static void deleteSourcePubSubTopic() {
     try {
       PubSubClient.deleteTopic(pubSubSourceTopic);
-      BeforeActions.scenario.write("Deleted Source PubSub topic " + pubSubSourceTopic);
+      BeforeActions.scenario.write("Deleted target PubSub topic " + pubSubSourceTopic);
       pubSubSourceTopic = StringUtils.EMPTY;
+    } catch (Exception e) {
+      if (e.getMessage().contains("Invalid resource name given") || e.getMessage().contains("Resource not found")) {
+
+      }
+    }
+  }
+
+  @After(order = 1, value = "@PUBSUB_SUBSCRIPTION_TEST")
+  public static void deleteSourcePubSubSubscription() {
+    try {
+      PubSubClient.deleteTopic(pubSubSourceSubscription);
+      BeforeActions.scenario.write("Deleted target PubSub topic " + pubSubSourceSubscription);
+      pubSubSourceSubscription = StringUtils.EMPTY;
     } catch (Exception e) {
       if (e.getMessage().contains("Invalid resource name given") || e.getMessage().contains("Resource not found")) {
         BeforeActions.scenario.write("Source PubSub topic " + pubSubSourceTopic + " does not exist.");
@@ -515,7 +525,21 @@ public class TestSetupHooks {
     }
   }
 
-  @After(order = 1, value = "")
+  public static void publishMessage() throws IOException, InterruptedException {
+    String dataMessage1 = PluginPropertyUtils.pluginProp("firstMessage");
+    String dataMessage2 = PluginPropertyUtils.pluginProp("secondMessage");
+    List<String> dataMessagesList = Arrays.asList(dataMessage1, dataMessage2);
+    PubSubClient.publishMessagesWithPubSub(PluginPropertyUtils.pluginProp
+      (ConstantsUtil.PROJECT_ID), pubSubSourceTopic, dataMessagesList);
+  }
+
+  @Before(order = 1, value = "@PUBSUB_SINK_TEST")
+  public static void createTargetPubSubTopic() {
+    pubSubTargetTopic = "cdf-e2e-test-" + UUID.randomUUID();
+    BeforeActions.scenario.write("Target PubSub topic " + pubSubTargetTopic);
+  }
+
+  @After(order = 1, value = "@PUBSUB_SINK_TEST")
   public static void deleteTargetPubSubTopic() {
     try {
       PubSubClient.deleteTopic(pubSubTargetTopic);
