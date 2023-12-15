@@ -21,6 +21,7 @@ import com.google.cloud.storage.StorageException;
 import io.cdap.e2e.pages.actions.CdfConnectionActions;
 import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
 import io.cdap.e2e.utils.BigQueryClient;
+import io.cdap.e2e.utils.ConstantsUtil;
 import io.cdap.e2e.utils.PluginPropertyUtils;
 import io.cdap.e2e.utils.StorageClient;
 import io.cdap.plugin.utils.PubSubClient;
@@ -62,6 +63,8 @@ public class TestSetupHooks {
   public static String bqSourceTable2 = StringUtils.EMPTY;
   public static String bqSourceView = StringUtils.EMPTY;
   public static String pubSubTargetTopic = StringUtils.EMPTY;
+  public static String pubSubSourceTopic = StringUtils.EMPTY;
+  public static String pubSubSourceSubscription = StringUtils.EMPTY;
   public static String spannerInstance = StringUtils.EMPTY;
   public static String spannerDatabase = StringUtils.EMPTY;
   public static String spannerSourceTable = StringUtils.EMPTY;
@@ -480,10 +483,43 @@ public class TestSetupHooks {
     return bucketName;
   }
 
+  @Before(order = 1, value = "@PUBSUB_SOURCE_TEST")
+  public static void createSourcePubSubTopic() throws IOException {
+    pubSubSourceTopic = "cdf-e2e-test-" + UUID.randomUUID();
+    PubSubClient.createTopic(pubSubSourceTopic);
+    BeforeActions.scenario.write("Source PubSub topic " + pubSubSourceTopic);
+  }
+
+  @Before(order = 1, value = "@PUBSUB_SUBSCRIPTION_TEST")
+  public static void createSubscriptionPubSubTopic() throws IOException {
+    pubSubSourceSubscription = "cdf-e2e-test-" + UUID.randomUUID();
+    PubSubClient.createSubscription(pubSubSourceSubscription,pubSubSourceTopic);
+    BeforeActions.scenario.write("Source PubSub subscription " + pubSubSourceSubscription);
+  }
+  @After(order = 1, value = "@PUBSUB_SOURCE_TEST")
+  public static void deleteSourcePubSubTopic() {
+    try {
+      PubSubClient.deleteTopic(pubSubSourceTopic);
+      BeforeActions.scenario.write("Deleted target PubSub topic " + pubSubSourceTopic);
+      pubSubSourceTopic = StringUtils.EMPTY;
+    } catch (Exception e) {
+      if (e.getMessage().contains("Invalid resource name given") || e.getMessage().contains("Resource not found")) {
+
+      }
+    }
+  }
+
   @Before(order = 1, value = "@PUBSUB_SINK_TEST")
   public static void createTargetPubSubTopic() {
     pubSubTargetTopic = "cdf-e2e-test-" + UUID.randomUUID();
     BeforeActions.scenario.write("Target PubSub topic " + pubSubTargetTopic);
+  }
+
+  public static void publishMessageJsonFormat() throws IOException, InterruptedException {
+    String jsonMessage = PluginPropertyUtils.pluginProp("message");
+    String jsonMessage2 = PluginPropertyUtils.pluginProp("message2");
+    List<String> jsonMessagesList = Arrays.asList(jsonMessage, jsonMessage2);
+   PubSubClient.publishWithErrorHandlerExample(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), pubSubSourceTopic, jsonMessagesList);
   }
 
   @After(order = 1, value = "@PUBSUB_SINK_TEST")
@@ -1141,7 +1177,7 @@ public class TestSetupHooks {
 
   @Before(value = "@BQ_INSERT_INT_SOURCE_TEST")
   public static void createSourceBQTable() throws IOException, InterruptedException {
-    bqSourceTable = "E2E_TARGET_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    bqSourceTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
     PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ source table name - " + bqSourceTable);
     BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSourceTable + "` " +
