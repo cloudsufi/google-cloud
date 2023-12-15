@@ -23,6 +23,7 @@ import io.cdap.plugin.gcp.common.MappingException;
 import io.cdap.plugin.gcp.publisher.PubSubConstants;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DecoderFactory;
