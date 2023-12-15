@@ -62,6 +62,8 @@ public class TestSetupHooks {
   public static String bqSourceTable2 = StringUtils.EMPTY;
   public static String bqSourceView = StringUtils.EMPTY;
   public static String pubSubTargetTopic = StringUtils.EMPTY;
+  public static String pubSubSourceTopic = StringUtils.EMPTY;
+  public static String pubSubSourceSubscription = StringUtils.EMPTY;
   public static String spannerInstance = StringUtils.EMPTY;
   public static String spannerDatabase = StringUtils.EMPTY;
   public static String spannerSourceTable = StringUtils.EMPTY;
@@ -484,6 +486,33 @@ public class TestSetupHooks {
   public static void createTargetPubSubTopic() {
     pubSubTargetTopic = "cdf-e2e-test-" + UUID.randomUUID();
     BeforeActions.scenario.write("Target PubSub topic " + pubSubTargetTopic);
+  }
+
+  @Before(order = 1, value = "@PUBSUB_SOURCE_TEST")
+  public static void createSourcePubSubTopic() throws IOException {
+    PubSubClient.createTopic(pubSubSourceTopic);
+    pubSubSourceTopic = "cdf-e2e-test-" + UUID.randomUUID();
+    BeforeActions.scenario.write("Target PubSub topic " + pubSubSourceTopic);
+  }
+
+  @Before(order = 1, value = "@PUBSUB_SUBSCRIPTION_TEST")
+  public static void createSubscriptionPubSubTopic() {
+    pubSubSourceSubscription = "cdf-e2e-test-" + UUID.randomUUID();
+    BeforeActions.scenario.write("Source PubSub subscription " + pubSubSourceSubscription);
+  }
+  @After(order = 1, value = "@PUBSUB_SOURCE_TEST")
+  public static void deleteSourcePubSubTopic() {
+    try {
+      PubSubClient.deleteTopic(pubSubSourceTopic);
+      BeforeActions.scenario.write("Deleted target PubSub topic " + pubSubSourceTopic);
+      pubSubSourceTopic = StringUtils.EMPTY;
+    } catch (Exception e) {
+      if (e.getMessage().contains("Invalid resource name given") || e.getMessage().contains("Resource not found")) {
+        BeforeActions.scenario.write("Source PubSub topic " + pubSubSourceTopic + " does not exist.");
+      } else {
+        Assert.fail(e.getMessage());
+      }
+    }
   }
 
   @After(order = 1, value = "@PUBSUB_SINK_TEST")
@@ -1141,7 +1170,7 @@ public class TestSetupHooks {
 
   @Before(value = "@BQ_INSERT_INT_SOURCE_TEST")
   public static void createSourceBQTable() throws IOException, InterruptedException {
-    bqSourceTable = "E2E_TARGET_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    bqSourceTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
     PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
     BeforeActions.scenario.write("BQ source table name - " + bqSourceTable);
     BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSourceTable + "` " +
