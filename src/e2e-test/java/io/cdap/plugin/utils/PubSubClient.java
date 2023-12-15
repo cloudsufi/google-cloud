@@ -16,11 +16,17 @@
 
 package io.cdap.plugin.utils;
 
+import com.google.api.gax.rpc.AlreadyExistsException;
+import com.google.cloud.pubsub.v1.SubscriptionAdminClient;
+import com.google.cloud.pubsub.v1.SubscriptionAdminSettings;
 import com.google.cloud.pubsub.v1.TopicAdminClient;
+import com.google.pubsub.v1.PushConfig;
+import com.google.pubsub.v1.Subscription;
 import com.google.pubsub.v1.Topic;
 import com.google.pubsub.v1.TopicName;
 import io.cdap.e2e.utils.ConstantsUtil;
 import io.cdap.e2e.utils.PluginPropertyUtils;
+import com.google.pubsub.v1.ProjectSubscriptionName;
 
 import java.io.IOException;
 
@@ -34,6 +40,21 @@ public class PubSubClient {
       TopicName topicName = TopicName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), topicId);
       return topicAdminClient.createTopic(topicName);
     }
+  }
+
+  // Create the subscription
+  public static Subscription createSubscription(String subscriptionId, String topicId) throws IOException {
+    ProjectSubscriptionName subscriptionName = null;
+    try (SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient.create(
+      SubscriptionAdminSettings.newBuilder().build())) {
+      TopicName topicName = TopicName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), topicId);
+      subscriptionName = ProjectSubscriptionName.of(ConstantsUtil.PROJECT_ID, subscriptionId);
+      subscriptionAdminClient.createSubscription(subscriptionName, topicName, PushConfig.getDefaultInstance(), 60);
+      System.out.println("Subscription created: " + subscriptionName.toString());
+    } catch (AlreadyExistsException e) {
+      System.out.println("Subscription already exists: " + subscriptionName.toString());
+    }
+    return null;
   }
 
   public static void deleteTopic(String topicId) throws IOException {
