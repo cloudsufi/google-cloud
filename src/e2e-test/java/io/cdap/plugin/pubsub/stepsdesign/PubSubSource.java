@@ -16,6 +16,8 @@
 
 package io.cdap.plugin.pubsub.stepsdesign;
 
+import io.cdap.plugin.common.stepsdesign.TestSetupHooks;
+import io.cdap.plugin.pubsub.actions.PubSubActions;
 import io.cdap.e2e.utils.CdfHelper;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -31,8 +33,23 @@ public class PubSubSource implements CdfHelper {
     selectSourcePlugin("GooglePublisher");
   }
 
+  @When("Source is PubSub Realtime")
+  public void sourceIsPubSubRealtime() {
+    PubSubActions.selectPubSubRealtimePlugin();
+  }
+
   @Then("Open the PubSub source properties")
   public void openThePubSubSourceProperties() {
     openSourcePluginProperties("GooglePublisher");
+  }
+
+  @Then("Create a topic in PubSub")
+  public void createATopicInPubSub() {
+    PubSubActions.enterSourceTopic(TestSetupHooks.pubSubSourceTopic);
+  }
+
+  @Then("Create a Subscription in PubSub")
+  public void createASubscriptionInPubSub() {
+    PubSubActions.enterSourceSubscription(TestSetupHooks.pubSubSourceSubscription);
   }
 }

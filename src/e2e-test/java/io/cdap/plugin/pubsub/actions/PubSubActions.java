@@ -15,6 +15,7 @@
  */
 package io.cdap.plugin.pubsub.actions;
 
+import io.cdap.e2e.pages.locators.CdfBigQueryPropertiesLocators;
 import io.cdap.e2e.pages.locators.CdfPluginPropertiesLocators;
 import io.cdap.e2e.pages.locators.CdfStudioLocators;
 import io.cdap.e2e.utils.ElementHelper;
@@ -43,6 +44,9 @@ public class PubSubActions {
 
   public static void enterPubSubTopic(String pubSubTopic) {
     ElementHelper.sendKeys(PubSubLocators.pubSubTopic, pubSubTopic);
+  }
+  public static void selectPubSubRealtimePlugin() {
+    ElementHelper.clickOnElement(PubSubLocators.pubSubRealtime);
   }
 
   public static void selectFormat(String formatType) {
@@ -80,6 +84,13 @@ public class PubSubActions {
 
   public static void enterSubscription(String subscription) {
     ElementHelper.sendKeys(PubSubLocators.subscription, subscription);
+  }
+
+  public static void enterSourceTopic(String topicName) {
+    ElementHelper.sendKeys(PubSubLocators.topicnameInput, topicName);
+  }
+  public static void enterSourceSubscription(String subscriptionName) {
+    ElementHelper.sendKeys(PubSubLocators.subscrptioncnameInput, subscriptionName);
   }
 
   public static void enterNumberOfReaders(String numberOfReaders) {

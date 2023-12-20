@@ -29,6 +29,9 @@ public class PubSubLocators {
   @FindBy(how = How.XPATH, using = "//input[@data-cy='referenceName']")
   public static WebElement pubSubReferenceName;
 
+  @FindBy(how = How.XPATH, using = "//*[@data-cy='plugin-GoogleSubscriber-streamingsource']")
+  public static WebElement pubSubRealtime;
+
   @FindBy(how = How.XPATH, using = "//input[@data-cy='project']")
   public static WebElement projectID;
 
@@ -37,6 +40,12 @@ public class PubSubLocators {
 
   @FindBy(how = How.XPATH, using = "//*[@data-cy='select-format']")
   public static WebElement format;
+
+  @FindBy(how = How.XPATH, using = "//input[@data-cy='topic']")
+  public static WebElement topicnameInput;
+
+  @FindBy(how = How.XPATH, using = "//input[@data-cy='subscription']")
+  public static WebElement subscrptioncnameInput;
 
   @FindBy(how = How.XPATH, using = "//input[@data-cy='messageCountBatchSize']")
   public static WebElement maximumBatchCount;
