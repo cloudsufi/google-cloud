@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
   features = {"src/e2e-test/features"},
   glue = {"io.cdap.plugin.bigquery.stepsdesign", "io.cdap.plugin.gcs.stepsdesign",
     "stepsdesign", "io.cdap.plugin.common.stepsdesign"},
-  tags = {"@BigQuery_Sink_Required"},
+  tags = {"@BigQuery_Sink_Requiredd"},
   monochrome = true,
   //TODO: Enable test once issue is fixed https://cdap.atlassian.net/browse/CDAP-20830
   plugin = {"pretty", "html:target/cucumber-html-report/bigquery-sink-required",

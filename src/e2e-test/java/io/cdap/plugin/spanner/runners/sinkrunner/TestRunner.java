@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
   features = {"src/e2e-test/features"},
   glue = {"io.cdap.plugin.spanner.stepsdesign", "io.cdap.plugin.bigquery.stepsdesign",
     "io.cdap.plugin.gcs.stepsdesign", "io.cdap.plugin.common.stepsdesign", "stepsdesign"},
-  tags = {"@Spanner_Sink"},
+  tags = {"@Spanner_Sinkk"},
   monochrome = true,
   plugin = {"pretty", "html:target/cucumber-html-report/spanner-sink",
     "json:target/cucumber-reports/cucumber-spanner-sink.json",

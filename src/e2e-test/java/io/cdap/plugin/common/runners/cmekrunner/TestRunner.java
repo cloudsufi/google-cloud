@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
   glue = {"io.cdap.plugin.gcs.stepsdesign", "io.cdap.plugin.bigquery.stepsdesign",
     "stepsdesign", "io.cdap.plugin.common.stepsdesign", "io.cdap.plugin.pubsub.stepsdesign",
           "io.cdap.plugin.gcsmove.stepsdesign"},
-  tags = {"@CMEK"},
+  tags = {"@CMEkK"},
   plugin = {"pretty", "html:target/cucumber-html-report/cmek", "json:target/cucumber-reports/cucumber-cmek.json",
     "junit:target/cucumber-reports/cucumber-cmek.xml", "io.cdap.e2e.utils.PropModifier:cmek-config.properties"},
   monochrome = true

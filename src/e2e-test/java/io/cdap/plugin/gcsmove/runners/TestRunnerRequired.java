@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
   features = {"src/e2e-test/features"},
   glue = {"io.cdap.plugin.gcsmove.stepsdesign", "io.cdap.plugin.gcs.stepsdesign",
     "stepsdesign", "io.cdap.plugin.common.stepsdesign"},
-  tags = {"@GCSMove_Required"},
+  tags = {"@GCSMove_Requiredd"},
   monochrome = true,
   plugin = {"pretty", "html:target/cucumber-html-report/gcsmove-action-required",
     "json:target/cucumber-reports/cucumber-gcsmove-action-required.json",

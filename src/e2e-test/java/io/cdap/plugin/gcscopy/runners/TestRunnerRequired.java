@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
   features = {"src/e2e-test/features"},
   glue = {"io.cdap.plugin.gcscopy.stepsdesign", "stepsdesign", "io.cdap.plugin.common.stepsdesign"},
-  tags = {"@GCSCopy_Required"},
+  tags = {"@GCSCopy_Requiredd"},
   monochrome = true,
   plugin = {"pretty", "html:target/cucumber-html-report/gcscopy-action",
     "json:target/cucumber-reports/cucumber-gcscopy-action.json",
