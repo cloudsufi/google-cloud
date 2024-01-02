@@ -490,9 +490,9 @@ public class TestSetupHooks {
 
   @Before(order = 1, value = "@PUBSUB_SOURCE_TEST")
   public static void createSourcePubSubTopic() throws IOException {
-    PubSubClient.createTopic(pubSubSourceTopic);
     pubSubSourceTopic = "cdf-e2e-test-" + UUID.randomUUID();
-    BeforeActions.scenario.write("Target PubSub topic " + pubSubSourceTopic);
+    PubSubClient.createTopic(pubSubSourceTopic);
+    BeforeActions.scenario.write("Source PubSub topic " + pubSubSourceTopic);
   }
 
   @Before(order = 1, value = "@PUBSUB_SUBSCRIPTION_TEST")
@@ -500,11 +500,11 @@ public class TestSetupHooks {
     pubSubSourceSubscription = "cdf-e2e-test-" + UUID.randomUUID();
     BeforeActions.scenario.write("Source PubSub subscription " + pubSubSourceSubscription);
   }
-  @After(order = 1, value = "@PUBSUB_SOURCE_TEST")
+  @After(order = 1, value = "")
   public static void deleteSourcePubSubTopic() {
     try {
       PubSubClient.deleteTopic(pubSubSourceTopic);
-      BeforeActions.scenario.write("Deleted target PubSub topic " + pubSubSourceTopic);
+      BeforeActions.scenario.write("Deleted Source PubSub topic " + pubSubSourceTopic);
       pubSubSourceTopic = StringUtils.EMPTY;
     } catch (Exception e) {
       if (e.getMessage().contains("Invalid resource name given") || e.getMessage().contains("Resource not found")) {
@@ -515,7 +515,7 @@ public class TestSetupHooks {
     }
   }
 
-  @After(order = 1, value = "@PUBSUB_SINK_TEST")
+  @After(order = 1, value = "")
   public static void deleteTargetPubSubTopic() {
     try {
       PubSubClient.deleteTopic(pubSubTargetTopic);

@@ -17,8 +17,14 @@
 package io.cdap.plugin.pubsub.stepsdesign;
 
 import io.cdap.e2e.utils.CdfHelper;
+import io.cdap.e2e.utils.ConstantsUtil;
+import io.cdap.e2e.utils.PluginPropertyUtils;
+import io.cdap.plugin.common.stepsdesign.TestSetupHooks;
+import io.cdap.plugin.pubsub.actions.PubSubActions;
+import io.cdap.plugin.utils.PubSubClient;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.io.IOException;
 
 /**
  * PubSub Source Plugin related step design.
@@ -33,6 +39,19 @@ public class PubSubSource implements CdfHelper {
 
   @Then("Open the PubSub source properties")
   public void openThePubSubSourceProperties() {
-    openSourcePluginProperties("GooglePublisher");
+    openSourcePluginProperties("pubsub");
+  }
+
+  @Then("Enter PubSub source property topic name")
+  public void enterPubSubSourcePropertyTopicName() {
+    PubSubActions.enterPubSubTopic(TestSetupHooks.pubSubSourceTopic); }
+  @Then("Enter PubSub source property subscription name")
+  public void enterPubSubSourcePropertySubscriptionName() {
+    PubSubActions.enterSubscription(TestSetupHooks.pubSubSourceSubscription);
+  }
+
+  @Then("Publish the message")
+  public void publishTheMessage() throws IOException, InterruptedException {
+    PubSubClient.publishWithErrorHandlerExample(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), TestSetupHooks.pubSubSourceTopic);
   }
 }
