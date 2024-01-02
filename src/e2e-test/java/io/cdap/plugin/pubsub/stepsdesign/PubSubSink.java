@@ -234,4 +234,10 @@ public class PubSubSink implements E2EHelper {
   public void clickOnPreviewDataForPubSubSink() {
     openSinkPluginPreviewData("GooglePublisher");
   }
+  @Then("Subscribe to the messages")
+  public void subscribeToTheMessages()
+  {
+    PubSubClient.subscribeAsyncExample(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID),TestSetupHooks.pubSubSourceSubscription);
+  }
+
 }
