@@ -505,6 +505,10 @@ public class TestSetupHooks {
     PubSubClient.createSubscription(pubSubSourceSubscription, pubSubSourceTopic);
     BeforeActions.scenario.write("Source PubSub subscription " + pubSubSourceSubscription);
   }
+  @Before(order = 1, value = "@PUBSUB_MESSAGE_TEST")
+  public static void createMessagePubSubTopic() throws IOException, InterruptedException {
+    PubSubClient.publishWithErrorHandlerExample(pubSubSourceTopic);
+  }
   @After(order = 1, value = "@PUBSUB_SOURCE_TEST")
   public static void deleteSourcePubSubTopic() {
     try {

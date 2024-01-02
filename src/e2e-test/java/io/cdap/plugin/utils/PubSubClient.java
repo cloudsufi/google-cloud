@@ -16,13 +16,20 @@
 
 package io.cdap.plugin.utils;
 
+import com.google.api.core.ApiFuture;
+import com.google.api.core.ApiFutureCallback;
+import com.google.api.core.ApiFutures;
 import com.google.api.gax.rpc.AlreadyExistsException;
+import com.google.api.gax.rpc.ApiException;
+import com.google.bigtable.repackaged.com.google.common.util.concurrent.MoreExecutors;
 import com.google.cloud.pubsub.v1.AckReplyConsumer;
 import com.google.cloud.pubsub.v1.MessageReceiver;
+import com.google.cloud.pubsub.v1.Publisher;
 import com.google.cloud.pubsub.v1.Subscriber;
 import com.google.cloud.pubsub.v1.SubscriptionAdminClient;
 import com.google.cloud.pubsub.v1.SubscriptionAdminSettings;
 import com.google.cloud.pubsub.v1.TopicAdminClient;
+import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.PushConfig;
 import com.google.pubsub.v1.Topic;
@@ -32,6 +39,8 @@ import io.cdap.e2e.utils.PluginPropertyUtils;
 import com.google.pubsub.v1.ProjectSubscriptionName;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -62,6 +71,54 @@ public class PubSubClient {
     return subscriptionName;
   }
 
+  public static void publishWithErrorHandlerExample(String topicId)
+    throws IOException, InterruptedException {
+    TopicName topicName = TopicName.of(ConstantsUtil.PROJECT_ID, topicId);
+    Publisher publisher = null;
+
+    try {
+      publisher = Publisher.newBuilder(topicName).build();
+
+      List<String> messages = Arrays.asList("first message", "second message");
+
+      for (final String message : messages) {
+        com.google.protobuf.ByteString data = ByteString.copyFromUtf8(message);
+        PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
+        ApiFuture<String> future = publisher.publish(pubsubMessage);
+
+        // Adding an asynchronous callback to handle success / failure
+        ApiFutures.addCallback(
+          future,
+          new ApiFutureCallback<String>() {
+
+            @Override
+            public void onFailure(Throwable throwable) {
+              if (throwable instanceof ApiException) {
+                ApiException apiException = ((ApiException) throwable);
+                // details on the API exception
+                // System.out.println(apiException.getStatusCode().getCode());
+                //System.out.println(apiException.isRetryable());
+              }
+              System.out.println("Error publishing message : " + message);
+            }
+
+            @Override
+            public void onSuccess(String messageId) {
+              // Once published, returns server-assigned message ids (unique within the topic)
+              System.out.println("Published message ID: " + messageId);
+            }
+          },
+          MoreExecutors.directExecutor());
+      }
+    } finally {
+      if (publisher != null) {
+        // When finished with the publisher, shutdown to free up resources.
+        publisher.shutdown();
+        publisher.awaitTermination(1, TimeUnit.MINUTES);
+      }
+    }
+  }
+
   public static void deleteTopic(String topicId) throws IOException {
     try (TopicAdminClient topicAdminClient = TopicAdminClient.create()) {
       TopicName topicName = TopicName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), topicId);
@@ -82,9 +139,9 @@ public class PubSubClient {
     return getTopic(topicId).getKmsKeyName();
   }
 
-  public static void subscribeAsyncExample(String projectId, String subscriptionId) {
+  public static void subscribeAsyncExample(String subscriptionId) {
     ProjectSubscriptionName subscriptionName =
-      ProjectSubscriptionName.of(projectId, subscriptionId);
+      ProjectSubscriptionName.of(ConstantsUtil.PROJECT_ID, subscriptionId);
 
     // Instantiate an asynchronous message receiver.
     MessageReceiver receiver =

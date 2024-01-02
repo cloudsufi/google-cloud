@@ -22,6 +22,8 @@ import io.cdap.e2e.utils.CdfHelper;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import java.io.IOException;
+
 /**
  * PubSub Source Plugin related step design.
  */
@@ -51,5 +53,11 @@ public class PubSubSource implements CdfHelper {
   @Then("Create a Subscription in PubSub")
   public void createASubscriptionInPubSub() {
     PubSubActions.enterSourceSubscription(TestSetupHooks.pubSubSourceSubscription);
+  }
+
+  @Then("Publish a message")
+  public void publishAMessage() throws IOException, InterruptedException {
+    Thread.sleep(500);
+    TestSetupHooks.createMessagePubSubTopic();
   }
 }

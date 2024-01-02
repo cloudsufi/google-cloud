@@ -7,10 +7,10 @@ Feature: PubSub-Sink - Verification of BigQuery to PubSub successful data transf
     And Select data pipeline type as: "Realtime"
     When Source is PubSub Realtime
     When Sink is PubSub
-    And Connect plugins: "Pub/Sub" and "Pub/Sub2" to establish connection
-    And Navigate to the properties page of plugin: "Pub/Sub"
+    And Connect plugins: "GoogleSubscriber" and "Pub/Sub" to establish connection
+    And Navigate to the properties page of plugin: "GoogleSubscriber"
     Then Enter input plugin property: "referenceName" with value: "sourceRef"
-    Then Enter input plugin property: "project" with value: "cdf-athena"
+    Then Replace input plugin property: "project" with value: "projectId"
     Then Create a topic in PubSub
     Then Create a Subscription in PubSub
     Then Click on the Validate button
@@ -21,6 +21,11 @@ Feature: PubSub-Sink - Verification of BigQuery to PubSub successful data transf
     Then Enter PubSub sink property topic name
     Then Validate "PubSub" plugin properties
     Then Close the PubSub properties
-    Then Save the pipeline
-    Then Preview and run the pipeline
+    And Save and Deploy Pipeline
+    And Run the Pipeline in Runtime
+    And Wait for pipeline to be in status: "Running" with a timeout of 240 seconds
+    And Publish a message
+    And Stop the pipeline
+    And Open and capture logs
+    Then Verify the pipeline status is "Stopped"
 
