@@ -19,10 +19,12 @@ package io.cdap.plugin.pubsub.stepsdesign;
 import io.cdap.plugin.common.stepsdesign.TestSetupHooks;
 import io.cdap.plugin.pubsub.actions.PubSubActions;
 import io.cdap.e2e.utils.CdfHelper;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * PubSub Source Plugin related step design.
@@ -55,9 +57,18 @@ public class PubSubSource implements CdfHelper {
     PubSubActions.enterSourceSubscription(TestSetupHooks.pubSubSourceSubscription);
   }
 
-  @Then("Publish a message")
+  @Then("Publish the message")
   public void publishAMessage() throws IOException, InterruptedException {
-    Thread.sleep(500);
+    TimeUnit time = TimeUnit.SECONDS;
+    time.sleep(60);
     TestSetupHooks.createMessagePubSubTopic();
+    TimeUnit time2 = TimeUnit.SECONDS;
+    time2.sleep(120);
+  }
+
+  @And("Subscribe the message")
+  public void subscribeTheMessage() throws IOException, InterruptedException {
+    TestSetupHooks.subscribeMessage();
+    Thread.sleep(60);
   }
 }

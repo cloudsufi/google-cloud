@@ -24,7 +24,8 @@ Feature: PubSub-Sink - Verification of BigQuery to PubSub successful data transf
     And Save and Deploy Pipeline
     And Run the Pipeline in Runtime
     And Wait for pipeline to be in status: "Running" with a timeout of 240 seconds
-    And Publish a message
+    And Publish the message
+    And Subscribe the message
     And Stop the pipeline
     And Open and capture logs
     Then Verify the pipeline status is "Stopped"
