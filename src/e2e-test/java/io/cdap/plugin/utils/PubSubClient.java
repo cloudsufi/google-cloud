@@ -30,14 +30,14 @@ import com.google.cloud.pubsub.v1.SubscriptionAdminSettings;
 import com.google.cloud.pubsub.v1.TopicAdminClient;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.ByteString;
+import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.PushConfig;
+import com.google.pubsub.v1.Subscription;
 import com.google.pubsub.v1.Topic;
 import com.google.pubsub.v1.TopicName;
 import io.cdap.e2e.utils.ConstantsUtil;
 import io.cdap.e2e.utils.PluginPropertyUtils;
-import com.google.pubsub.v1.ProjectSubscriptionName;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -62,7 +62,7 @@ public class PubSubClient {
     try (SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient.create(
       SubscriptionAdminSettings.newBuilder().build())) {
       TopicName topicName = TopicName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), topicId);
-      subscriptionName = ProjectSubscriptionName.of(ConstantsUtil.PROJECT_ID, subscriptionId);
+       subscriptionName = ProjectSubscriptionName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), subscriptionId);
       subscriptionAdminClient.createSubscription(subscriptionName, topicName, PushConfig.getDefaultInstance(), 60);
       System.out.println("Subscription created: " + subscriptionName.toString());
     } catch (AlreadyExistsException e) {
@@ -94,14 +94,12 @@ public class PubSubClient {
 
   public static void publishWithErrorHandlerExample(String projectId, String topicId)
       throws IOException, InterruptedException {
-    TopicName topicName = TopicName.of(projectId, topicId);
+    TopicName topicName = TopicName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), topicId);
     Publisher publisher = null;
-
     try {
       publisher = Publisher.newBuilder(topicName).build();
 
       List<String> messages = Arrays.asList("first message", "second message");
-
       for (final String message : messages) {
         ByteString data = ByteString.copyFromUtf8(message);
         PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
@@ -116,9 +114,9 @@ public class PubSubClient {
               public void onFailure(Throwable throwable) {
                 if (throwable instanceof ApiException) {
                   ApiException apiException = ((ApiException) throwable);
-                  // details on the API exception
-                  // System.out.println(apiException.getStatusCode().getCode());
-                  //System.out.println(apiException.isRetryable());
+                   // details on the API exception
+                   System.out.println(apiException.getStatusCode().getCode());
+                  System.out.println(apiException.isRetryable());
                 }
                 System.out.println("Error publishing message : " + message);
               }
@@ -141,9 +139,8 @@ public class PubSubClient {
   }
 
   public static void subscribeAsyncExample(String projectId, String subscriptionId) {
-    ProjectSubscriptionName subscriptionName =
-        ProjectSubscriptionName.of(projectId, subscriptionId);
-
+    ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(PluginPropertyUtils.pluginProp
+      (ConstantsUtil.PROJECT_ID), subscriptionId);
     // Instantiate an asynchronous message receiver.
     MessageReceiver receiver =
         (PubsubMessage message, AckReplyConsumer consumer) -> {
@@ -166,8 +163,4 @@ public class PubSubClient {
       subscriber.stopAsync();
     }
   }
-
-
-
-
 }

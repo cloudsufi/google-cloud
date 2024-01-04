@@ -61,20 +61,18 @@ Feature: PubSub-Sink - Verification of BigQuery to PubSub successful data transf
     Then Enter PubSub property projectId "projectId"
     Then Override Service account details if set in environment variables
     Then Enter PubSub property reference name
-    Then Enter PubSub source property topic name
+    Then Enter PubSub sink property topic name
     Then Validate "Pub/Sub" plugin properties
     And Close the Plugin Properties page
-
+    And Click on configure button
+    And Click on pipeline config
+    And Click on batch time and select format
     Then Save the pipeline
-    Then Preview and run the pipeline
-    Then Wait till pipeline preview is in running state
-    Then Open and capture pipeline preview logs
-    Then Close the pipeline logs
-    Then Close the preview
     Then Deploy the pipeline
     Then Run the Pipeline in Runtime
-   # Then Wait till pipeline is in running state
-    #Then Open and capture logs
-    #Then Verify the pipeline status is "Succeeded"
+    Then Wait for pipeline to be in status: "Running" with a timeout of 240 seconds
     Then Publish the message
     Then Subscribe to the messages
+    Then Validate OUT record count is equal to IN record count
+    And Stop the pipeline
+    Then Verify the pipeline status is "Stopped"

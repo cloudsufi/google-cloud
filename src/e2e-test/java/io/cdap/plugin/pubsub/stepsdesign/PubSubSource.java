@@ -25,6 +25,7 @@ import io.cdap.plugin.utils.PubSubClient;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * PubSub Source Plugin related step design.
@@ -52,6 +53,9 @@ public class PubSubSource implements CdfHelper {
 
   @Then("Publish the message")
   public void publishTheMessage() throws IOException, InterruptedException {
-    PubSubClient.publishWithErrorHandlerExample(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), TestSetupHooks.pubSubSourceTopic);
+    TimeUnit time = TimeUnit.SECONDS;
+    time.sleep(120);
+    PubSubClient.publishWithErrorHandlerExample(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID),
+                                                TestSetupHooks.pubSubSourceTopic);
   }
 }
