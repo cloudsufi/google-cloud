@@ -62,7 +62,8 @@ public class PubSubClient {
     try (SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient.create(
       SubscriptionAdminSettings.newBuilder().build())) {
       TopicName topicName = TopicName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), topicId);
-       subscriptionName = ProjectSubscriptionName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), subscriptionId);
+       subscriptionName = ProjectSubscriptionName.of
+         (PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), subscriptionId);
       subscriptionAdminClient.createSubscription(subscriptionName, topicName, PushConfig.getDefaultInstance(), 60);
       System.out.println("Subscription created: " + subscriptionName.toString());
     } catch (AlreadyExistsException e) {

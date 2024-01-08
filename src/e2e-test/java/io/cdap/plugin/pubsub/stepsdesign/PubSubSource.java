@@ -16,8 +16,10 @@
 
 package io.cdap.plugin.pubsub.stepsdesign;
 
+import io.cdap.e2e.pages.locators.CdfStudioLocators;
 import io.cdap.e2e.utils.CdfHelper;
 import io.cdap.e2e.utils.ConstantsUtil;
+import io.cdap.e2e.utils.ElementHelper;
 import io.cdap.e2e.utils.PluginPropertyUtils;
 import io.cdap.plugin.common.stepsdesign.TestSetupHooks;
 import io.cdap.plugin.pubsub.actions.PubSubActions;
@@ -51,11 +53,21 @@ public class PubSubSource implements CdfHelper {
     PubSubActions.enterSubscription(TestSetupHooks.pubSubSourceSubscription);
   }
 
-  @Then("Publish the message")
+  @Then("Publish the messages")
   public void publishTheMessage() throws IOException, InterruptedException {
     TimeUnit time = TimeUnit.SECONDS;
     time.sleep(120);
     PubSubClient.publishWithErrorHandlerExample(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID),
                                                 TestSetupHooks.pubSubSourceTopic);
+  }
+
+  @Then("Enter runtime argument value for PubSub source property topic key {string}")
+  public void enterRuntimeArgumentValueForPubSubSourcePropertyTopicKey(String runtimeArgumentKey) {
+    ElementHelper.sendKeys(CdfStudioLocators.runtimeArgsValue(runtimeArgumentKey), TestSetupHooks.pubSubSourceTopic);
+  }
+
+  @Then("Enter runtime argument value for PubSub source property subscription key {string}")
+  public void enterRuntimeArgumentValueForPubSubSourcePropertySubscriptionKey(String runtimeArgumentKey) {
+    ElementHelper.sendKeys(CdfStudioLocators.runtimeArgsValue(runtimeArgumentKey), TestSetupHooks.pubSubSourceSubscription);
   }
 }

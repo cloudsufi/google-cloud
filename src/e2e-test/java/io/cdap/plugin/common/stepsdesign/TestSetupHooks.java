@@ -482,6 +482,32 @@ public class TestSetupHooks {
     return bucketName;
   }
 
+  @Before(order = 1, value = "@PUBSUB_SOURCE_TEST")
+  public static void createSourcePubSubTopic() throws IOException {
+    pubSubSourceTopic = "cdf-e2e-test-" + UUID.randomUUID();
+    PubSubClient.createTopic(pubSubSourceTopic);
+    BeforeActions.scenario.write("Source PubSub topic " + pubSubSourceTopic);
+  }
+
+  @Before(order = 1, value = "@PUBSUB_SUBSCRIPTION_TEST")
+  public static void createSubscriptionPubSubTopic() throws IOException {
+    pubSubSourceSubscription = "cdf-e2e-test-" + UUID.randomUUID();
+    PubSubClient.createSubscription(pubSubSourceSubscription,pubSubSourceTopic);
+    BeforeActions.scenario.write("Source PubSub subscription " + pubSubSourceSubscription);
+  }
+  @After(order = 1, value = "@PUBSUB_SOURCE_TESTt")
+  public static void deleteSourcePubSubTopic() {
+    try {
+      PubSubClient.deleteTopic(pubSubSourceTopic);
+      BeforeActions.scenario.write("Deleted target PubSub topic " + pubSubSourceTopic);
+      pubSubSourceTopic = StringUtils.EMPTY;
+    } catch (Exception e) {
+      if (e.getMessage().contains("Invalid resource name given") || e.getMessage().contains("Resource not found")) {
+
+      }
+    }
+  }
+
   @Before(order = 1, value = "@PUBSUB_SINK_TEST")
   public static void createTargetPubSubTopic() {
     pubSubTargetTopic = "cdf-e2e-test-" + UUID.randomUUID();
