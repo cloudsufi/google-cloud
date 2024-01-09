@@ -15,7 +15,7 @@
 @PubSub_Source
 Feature: PubSub Source - Verification of PubSub to PubSub successful data transfer in different formats.
 
-  @PUBSUB_SOURCE_TEST @PUBSUB_SINK_TEST @PUBSUB_SUBSCRIPTION_TEST
+  @PUBSUB_SOURCE_TEST @PUBSUB_SINK_TEST @PUBSUB_SUBSCRIPTION_TEST @PUBSUB_MESSAGE_TEST
   Scenario: Validate successful transfer of records from PubSub(source) to PubSub(sink).
     Given Open Datafusion Project to configure pipeline
     When Select data pipeline type as: "Realtime"
@@ -51,7 +51,7 @@ Feature: PubSub Source - Verification of PubSub to PubSub successful data transf
     And Stop the pipeline
     Then Verify the pipeline status is "Stopped"
 
-  @PUBSUB_SOURCE_TEST @PUBSUB_SINK_TEST @PUBSUB_SUBSCRIPTION_TEST
+  @PUBSUB_SOURCE_TEST @PUBSUB_SINK_TEST @PUBSUB_SUBSCRIPTION_TEST @PUBSUB_MESSAGE_TEST
     Scenario: Validate successful transfer of records from PubSub(source) to PubSub(sink) using macros.
       Given Open Datafusion Project to configure pipeline
       When Select data pipeline type as: "Realtime"
@@ -63,8 +63,8 @@ Feature: PubSub Source - Verification of PubSub to PubSub successful data transf
       Then Navigate to the properties page of plugin: "Pub/Sub"
       Then Override Service account details if set in environment variables
       Then Enter input plugin property: "referenceName" with value: "BQReferenceName"
-      Then Click on the Macro button of Property: "topic" and set the value in textarea: "PubSubSourceTopic"
-      Then Click on the Macro button of Property: "subscription" and set the value in textarea: "PubSubSourceSubscription"
+      Then Click on the Macro button of Property: "topic" and set the value to: "PubSubSourceTopic"
+      Then Click on the Macro button of Property: "subscription" and set the value to: "PubSubSourceSubscription"
       Then Validate "Pub/Sub" plugin properties
       And Close the Plugin Properties page
       Then Open the PubSub sink properties
@@ -78,9 +78,9 @@ Feature: PubSub Source - Verification of PubSub to PubSub successful data transf
       And Click on pipeline config
       And Click on batch time and select format
       Then Save the pipeline
+      Then Deploy the pipeline
       Then Enter runtime argument value for PubSub source property topic key "PubSubSourceTopic"
       Then Enter runtime argument value for PubSub source property subscription key "PubSubSourceSubscription"
-      Then Deploy the pipeline
       Then Run the Pipeline in Runtime with runtime arguments
       Then Wait for pipeline to be in status: "Running" with a timeout of 240 seconds
       Then Publish the messages
@@ -89,7 +89,7 @@ Feature: PubSub Source - Verification of PubSub to PubSub successful data transf
       And Stop the pipeline
       Then Verify the pipeline status is "Stopped"
 
-  @PUBSUB_SOURCE_TEST @PUBSUB_SINK_TEST @PUBSUB_SUBSCRIPTION_TEST
+  @PUBSUB_SOURCE_TEST @PUBSUB_SINK_TEST @PUBSUB_SUBSCRIPTION_TEST @PUBSUB_MESSAGE_TEST
   Scenario: Validate successful transfer of records from PubSub(source) to PubSub(sink)  having formats TEXT at both source and sink.
     Given Open Datafusion Project to configure pipeline
     When Select data pipeline type as: "Realtime"
@@ -127,8 +127,8 @@ Feature: PubSub Source - Verification of PubSub to PubSub successful data transf
     And Stop the pipeline
     Then Verify the pipeline status is "Stopped"
 
-  @PUBSUB_SOURCE_TEST @PUBSUB_SINK_TEST @PUBSUB_SUBSCRIPTION_TEST
-  Scenario: Validate successful transfer of records from PubSub(source) to PubSub(sink)  having formats TEXT at both source and sink.
+  @PUBSUB_SOURCE_TEST @PUBSUB_SINK_TEST @PUBSUB_SUBSCRIPTION_TEST @PUBSUB_MESSAGE_TEST
+  Scenario: Validate successful transfer of records from PubSub(source) to PubSub(sink)  having formats TEXT at source and JSON at sink.
     Given Open Datafusion Project to configure pipeline
     When Select data pipeline type as: "Realtime"
     When Expand Plugin group in the LHS plugins list: "Source"
@@ -149,7 +149,7 @@ Feature: PubSub Source - Verification of PubSub to PubSub successful data transf
     Then Override Service account details if set in environment variables
     Then Enter PubSub property reference name
     Then Enter PubSub sink property topic name
-    Then Select dropdown plugin property: "select-format" with option value: "text"
+    Then Select dropdown plugin property: "select-format" with option value: "json"
     Then Validate "Pub/Sub" plugin properties
     And Close the Plugin Properties page
     And Click on configure button

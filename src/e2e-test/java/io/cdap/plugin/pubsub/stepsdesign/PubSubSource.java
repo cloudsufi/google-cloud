@@ -57,8 +57,7 @@ public class PubSubSource implements CdfHelper {
   public void publishTheMessage() throws IOException, InterruptedException {
     TimeUnit time = TimeUnit.SECONDS;
     time.sleep(120);
-    PubSubClient.publishWithErrorHandlerExample(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID),
-                                                TestSetupHooks.pubSubSourceTopic);
+    TestSetupHooks.publishMessage();
   }
 
   @Then("Enter runtime argument value for PubSub source property topic key {string}")
@@ -68,6 +67,7 @@ public class PubSubSource implements CdfHelper {
 
   @Then("Enter runtime argument value for PubSub source property subscription key {string}")
   public void enterRuntimeArgumentValueForPubSubSourcePropertySubscriptionKey(String runtimeArgumentKey) {
-    ElementHelper.sendKeys(CdfStudioLocators.runtimeArgsValue(runtimeArgumentKey), TestSetupHooks.pubSubSourceSubscription);
+    ElementHelper.sendKeys(CdfStudioLocators.runtimeArgsValue(runtimeArgumentKey),
+                           TestSetupHooks.pubSubSourceSubscription);
   }
 }

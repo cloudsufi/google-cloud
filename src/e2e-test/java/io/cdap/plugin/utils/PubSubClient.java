@@ -93,15 +93,15 @@ public class PubSubClient {
   }
 
 
-  public static void publishWithErrorHandlerExample(String projectId, String topicId)
+  public static void publishWithErrorHandlerExample(String projectId, String topicId, List<String> dataMessages)
       throws IOException, InterruptedException {
     TopicName topicName = TopicName.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID), topicId);
     Publisher publisher = null;
     try {
       publisher = Publisher.newBuilder(topicName).build();
 
-      List<String> messages = Arrays.asList("first message", "second message");
-      for (final String message : messages) {
+//      List<String> messages = Arrays.asList("first message", "second message");
+      for (final String message : dataMessages) {
         ByteString data = ByteString.copyFromUtf8(message);
         PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
         ApiFuture<String> future = publisher.publish(pubsubMessage);
@@ -158,7 +158,7 @@ public class PubSubClient {
       subscriber.startAsync().awaitRunning();
       System.out.printf("Listening for messages on %s:\n", subscriptionName.toString());
       // Allow the subscriber to run for 30s unless an unrecoverable error occurs.
-      subscriber.awaitTerminated(300, TimeUnit.SECONDS);
+      subscriber.awaitTerminated(200, TimeUnit.SECONDS);
     } catch (TimeoutException timeoutException) {
       // Shut down the subscriber after 30s. Stop receiving messages.
       subscriber.stopAsync();

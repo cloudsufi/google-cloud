@@ -21,6 +21,7 @@ import com.google.cloud.storage.StorageException;
 import io.cdap.e2e.pages.actions.CdfConnectionActions;
 import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
 import io.cdap.e2e.utils.BigQueryClient;
+import io.cdap.e2e.utils.ConstantsUtil;
 import io.cdap.e2e.utils.PluginPropertyUtils;
 import io.cdap.e2e.utils.StorageClient;
 import io.cdap.plugin.utils.PubSubClient;
@@ -492,7 +493,7 @@ public class TestSetupHooks {
   @Before(order = 1, value = "@PUBSUB_SUBSCRIPTION_TEST")
   public static void createSubscriptionPubSubTopic() throws IOException {
     pubSubSourceSubscription = "cdf-e2e-test-" + UUID.randomUUID();
-    PubSubClient.createSubscription(pubSubSourceSubscription,pubSubSourceTopic);
+    PubSubClient.createSubscription(pubSubSourceSubscription , pubSubSourceTopic);
     BeforeActions.scenario.write("Source PubSub subscription " + pubSubSourceSubscription);
   }
   @After(order = 1, value = "@PUBSUB_SOURCE_TESTt")
@@ -507,6 +508,15 @@ public class TestSetupHooks {
       }
     }
   }
+
+  public static void publishMessage() throws IOException, InterruptedException {
+    String dataMessage1 = PluginPropertyUtils.pluginProp("firstMessage");
+    String dataMessage2 = PluginPropertyUtils.pluginProp("secondMessage");
+    List<String> dataMessagesList = Arrays.asList(dataMessage1, dataMessage2);
+    PubSubClient.publishWithErrorHandlerExample(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID),
+                                                pubSubSourceTopic, dataMessagesList);
+  }
+
 
   @Before(order = 1, value = "@PUBSUB_SINK_TEST")
   public static void createTargetPubSubTopic() {
