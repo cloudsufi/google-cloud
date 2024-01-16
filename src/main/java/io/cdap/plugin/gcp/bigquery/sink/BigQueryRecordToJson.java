@@ -250,10 +250,14 @@ public final class BigQueryRecordToJson {
         }
         if (element instanceof StructuredRecord) {
           StructuredRecord record = (StructuredRecord) element;
+          path.add(name);
           processRecord(writer, record, Objects.requireNonNull(record.getSchema().getFields()),
                   path, jsonStringFieldsPaths);
+          path.remove(path.size() - 1);
         } else {
+          path.add(name);
           write(writer, name, true, element, componentSchema, path, jsonStringFieldsPaths);
+          path.remove(path.size() - 1);
         }
       }
     }
