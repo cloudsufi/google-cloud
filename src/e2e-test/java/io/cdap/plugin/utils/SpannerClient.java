@@ -51,10 +51,9 @@ public class SpannerClient {
 
   public static Optional<String> getSoleQueryResult(String instanceId, String databaseId, String query) {
     try (Spanner spannerService = SpannerOptions.newBuilder()
-      .setProjectId(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID)).build().getService()) {
-      DatabaseClient databaseClient = spannerService
-        .getDatabaseClient(DatabaseId.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID)
-          , instanceId, databaseId));
+            .setProjectId(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID)).build().getService()) {
+      DatabaseClient databaseClient = spannerService.getDatabaseClient(DatabaseId.of(PluginPropertyUtils.pluginProp(ConstantsUtil.PROJECT_ID)
+              , instanceId, databaseId));
       try (ResultSet resultSet = databaseClient.singleUse().executeQuery(Statement.of(query))) {
         String outputRowValue = null;
         if (resultSet.next()) {
