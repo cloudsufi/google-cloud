@@ -236,7 +236,7 @@ Feature: GCS source - Verification of GCS to GCS Additional Tests successful
     Then Wait till pipeline is in running state
     Then Verify the pipeline status is "Failed"
 
-  @GCS_MULTIPLE_FILES_TEST @GCS_SINK_TEST @GCS_Source_Required @ITN_TEST
+  @GCS_MULTIPLE_FILES_TEST @GCS_SINK_TEST @GCS_Source_Required @ITN_TEST @Debug
   Scenario: To verify the pipeline is getting failed from GCS Source to GCS Sink On Multiple File having different schemas without connection
     Given Open Datafusion Project to configure pipeline
     When Select plugin: "GCS" from the plugins list as: "Source"
