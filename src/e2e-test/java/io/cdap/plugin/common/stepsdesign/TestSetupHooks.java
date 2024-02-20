@@ -274,6 +274,33 @@ public class TestSetupHooks {
     BeforeActions.scenario.write("BQ source Table " + bqSourceTable + " created successfully");
   }
 
+  @Before(order = 1, value = "@BQEXECUTE_SOURCE_TEST")
+  public static void createBQEcxecuteSourceBQTable() throws IOException, InterruptedException {
+    bqSourceTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-", "_");
+    BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSourceTable + "` " +
+                                        "(ID INT64, Name STRING, " + "Price FLOAT64," +
+                                        "TableName STRING ) ");
+    try {
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSourceTable + "` " +
+                                                            "(ID,  Name, Price, TableName)" +
+                                                            "VALUES" + "(1, 'string_1', 0.1, 'Test')");
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
+    }
+    PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
+    BeforeActions.scenario.write("BQ source Table " + bqSourceTable + " created successfully");
+  }
+
+ @After(order = 1, value = "@BQEXECUTE_SOURCE_TEST")
+  public static void deleteBQExecuteSourceTable() throws IOException, InterruptedException {
+    BigQueryClient.dropBqQuery(bqSourceTable);
+    PluginPropertyUtils.removePluginProp("bqSourceTable");
+    BeforeActions.scenario.write("BQ source Table " + bqSourceTable + " deleted successfully");
+    bqSourceTable = StringUtils.EMPTY;
+  }
+
   @After(order = 1, value = "@BQ_SOURCE_TEST or @BQ_PARTITIONED_SOURCE_TEST or @BQ_SOURCE_DATATYPE_TEST or " +
     "@BQ_INSERT_SOURCE_TEST or @BQ_UPDATE_SINK_TEST or @BQ_EXISTING_SOURCE_TEST or @BQ_EXISTING_SINK_TEST or " +
     "@BQ_EXISTING_SOURCE_DATATYPE_TEST or @BQ_EXISTING_SINK_DATATYPE_TEST")
