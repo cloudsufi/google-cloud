@@ -1296,4 +1296,27 @@ public class TestSetupHooks {
   public static void createBucketWithLifeCycle() throws IOException, URISyntaxException {
     gcsTargetBucketName = createGCSBucketLifeCycle();
     BeforeActions.scenario.write("GCS target bucket name - " + gcsTargetBucketName); }
+
+  @Before(order = 1, value = "@BQMT_EXISTING_SOURCE_TEST")
+  public static void createSourceBQMTExistingTable() throws IOException, InterruptedException {
+    bqSourceTable = "E2E_SOURCE_" + UUID.randomUUID().toString().replaceAll("-" , "_");
+    io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("create table `" + datasetName + "." + bqSourceTable + "` " +
+                                                          "(ID INT64, tablename STRING, " + "Price FLOAT64," +
+                                                          "Customer_Exists BOOL ) ");
+    try {
+      io.cdap.e2e.utils.BigQueryClient.getSoleQueryResult("INSERT INTO `" + datasetName + "." + bqSourceTable + "` " +
+                                                            "(ID, tablename, Price, Customer_Exists)" +
+                                                            "VALUES" + "(1, 'tabA', 200.0, true)," +
+                                                          "(2, 'tabA', 0.2, false)," +
+                                                            "(3, 'tabB', 0.3, false)," +
+                                                            "(4, 'tabB', 0.3, false)");
+    } catch (NoSuchElementException e) {
+      // Insert query does not return any record.
+      // Iterator on TableResult values in getSoleQueryResult method throws NoSuchElementException
+      BeforeActions.scenario.write("Error inserting the record in the table" + e.getStackTrace());
+    }
+    PluginPropertyUtils.addPluginProp("bqSourceTable", bqSourceTable);
+    BeforeActions.scenario.write("BQ Source Table " + bqSourceTable + " created successfully");
+  }
+
 }
