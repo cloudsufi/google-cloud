@@ -17,6 +17,9 @@
 package io.cdap.plugin.gcp.gcs.sink;
 
 import io.cdap.cdap.api.data.format.StructuredRecord;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -83,8 +86,8 @@ public class DelegatingGCSRecordWriter extends RecordWriter<NullWritable, Struct
     // Call the Commit Task and Commit Job implementations of this plugin to copy files into their final directory.
     // We need to do this at this stage because the OutputCommitter needs to be aware of the different partitions
     // that have been stored so far.
-    delegatingGCSOutputCommitter.commitTask(context);
-    delegatingGCSOutputCommitter.commitJob(context);
+//    delegatingGCSOutputCommitter.commitTask(context);
+//    delegatingGCSOutputCommitter.commitJob(context);
   }
 
 }
