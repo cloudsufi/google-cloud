@@ -16,6 +16,9 @@
 
 package io.cdap.plugin.gcp.gcs.sink;
 
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.mapreduce.OutputCommitter;
@@ -23,6 +26,7 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +54,8 @@ public class DelegatingGCSOutputCommitter extends OutputCommitter {
                                                     String tableName) throws IOException, InterruptedException {
     //Set output directory
     context.getConfiguration().set(FileOutputFormat.OUTDIR,
-                                   DelegatingGCSOutputUtils.buildOutputPath(context.getConfiguration(), tableName));
+                                   DelegatingGCSOutputUtils.buildOutputPath(context.getConfiguration(), tableName,
+                                           context.getTaskAttemptID().toString()));
 
     //Wrap output committer into the GCS Output Committer.
     GCSOutputCommitter gcsOutputCommitter = new GCSOutputCommitter(outputFormat.getOutputCommitter(context));
@@ -64,11 +69,13 @@ public class DelegatingGCSOutputCommitter extends OutputCommitter {
   @Override
   public void setupJob(JobContext jobContext) throws IOException {
     //no-op
+    // _temp
   }
 
   @Override
   public void setupTask(TaskAttemptContext taskAttemptContext) throws IOException {
     //no-op
+    // /_temp/ATTEM_ID
   }
 
   @Override
@@ -95,6 +102,37 @@ public class DelegatingGCSOutputCommitter extends OutputCommitter {
 
   @Override
   public void commitJob(JobContext jobContext) throws IOException {
+    // CLEANUP
+    // ROOT/_temp
+    // SAVED ALL PATHS
+    // EXTRA COPY
+
+    // All list of files in ROOT/
+
+    // If empty ?
+    // FIX THIS LATER :!
+//    if (committerMap.isEmpty()) {
+//      Path outputPath = new Path(jobContext.getConfiguration().get(DelegatingGCSOutputFormat.OUTPUT_PATH_BASE_DIR));
+//      String suffix = jobContext.getConfiguration().get(DelegatingGCSOutputFormat.OUTPUT_PATH_SUFFIX);
+//      FileSystem fs = outputPath.getFileSystem(jobContext.getConfiguration());
+//      for (FileStatus status : fs.listStatus(outputPath)) {
+//        if (status.isDirectory()) {
+//          for (FileStatus fileStatus : fs.listStatus(status.getPath())) {
+//            if (fileStatus.getPath().getName().endsWith(suffix)) {
+//              Path destPath = new Path(outputPath, fileStatus.getPath().getName());
+//              for (FileStatus file : fs.listStatus(fileStatus.getPath())) {
+//                for (FileStatus data : fs.listStatus(fileStatus.getPath())) {
+//                  if (!file.getPath().getName().equals("_SUCCESS")) {
+//                    System.out.println("Moving file " + data.getPath() + " to " + destPath);
+//                    fs.rename(data.getPath(), new Path(destPath, data.getPath().getName()));
+//                  }
+//                }
+//              }
+//            }
+//          }
+//        }
+//      }
+//    }
     for (OutputCommitter committer : committerMap.values()) {
       committer.commitJob(jobContext);
     }

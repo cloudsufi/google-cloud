@@ -72,7 +72,6 @@ public class DelegatingGCSRecordWriter extends RecordWriter<NullWritable, Struct
       delegate = format.getRecordWriter(context);
       delegateMap.put(tableName, delegate);
     }
-
     delegate.write(key, record);
   }
 
@@ -86,8 +85,8 @@ public class DelegatingGCSRecordWriter extends RecordWriter<NullWritable, Struct
     // Call the Commit Task and Commit Job implementations of this plugin to copy files into their final directory.
     // We need to do this at this stage because the OutputCommitter needs to be aware of the different partitions
     // that have been stored so far.
-//    delegatingGCSOutputCommitter.commitTask(context);
-//    delegatingGCSOutputCommitter.commitJob(context);
+    delegatingGCSOutputCommitter.commitTask(context);
+    delegatingGCSOutputCommitter.commitJob(context);
   }
 
 }

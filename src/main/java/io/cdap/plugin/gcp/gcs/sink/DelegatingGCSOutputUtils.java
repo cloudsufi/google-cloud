@@ -40,10 +40,10 @@ public class DelegatingGCSOutputUtils {
     }
   }
 
-  public static String buildOutputPath(Configuration hConf, String context) {
-    return String.format("%s/%s/%s",
+  public static String buildOutputPath(Configuration hConf, String context, String taskId) {
+    return String.format("%s/%s/%s/%s",
                          hConf.get(DelegatingGCSOutputFormat.OUTPUT_PATH_BASE_DIR),
                          context,
-                         hConf.get(DelegatingGCSOutputFormat.OUTPUT_PATH_SUFFIX));
+                         hConf.get(DelegatingGCSOutputFormat.OUTPUT_PATH_SUFFIX), taskId);
   }
 }
