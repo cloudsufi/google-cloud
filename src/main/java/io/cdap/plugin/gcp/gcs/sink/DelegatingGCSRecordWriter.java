@@ -86,7 +86,7 @@ public class DelegatingGCSRecordWriter extends RecordWriter<NullWritable, Struct
     // We need to do this at this stage because the OutputCommitter needs to be aware of the different partitions
     // that have been stored so far.
     delegatingGCSOutputCommitter.commitTask(context);
-    delegatingGCSOutputCommitter.commitJob(context);
+//    delegatingGCSOutputCommitter.commitJob(context);
   }
 
 }
