@@ -20,6 +20,7 @@ import com.google.cloud.bigtable.admin.v2.BigtableInstanceAdminClient;
 import com.google.cloud.bigtable.admin.v2.BigtableInstanceAdminSettings;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.StorageException;
+import com.google.pubsub.v1.Encoding;
 import io.cdap.e2e.pages.actions.CdfConnectionActions;
 import io.cdap.e2e.pages.actions.CdfPluginPropertiesActions;
 import io.cdap.e2e.utils.BigQueryClient;
@@ -70,6 +71,9 @@ public class TestSetupHooks {
   public static String bqTargetTable2 = StringUtils.EMPTY;
   public static String bqSourceView = StringUtils.EMPTY;
   public static String pubSubTargetTopic = StringUtils.EMPTY;
+  public static String pubSubSourceTopic = StringUtils.EMPTY;
+  public static String pubSubSourceSubscription = StringUtils.EMPTY;
+  public static String pubSubSchemaId = StringUtils.EMPTY;
   public static String spannerInstance = StringUtils.EMPTY;
   public static String spannerDatabase = StringUtils.EMPTY;
   public static String spannerSourceTable = StringUtils.EMPTY;
@@ -503,10 +507,100 @@ public class TestSetupHooks {
     return bucketName;
   }
 
+  @Before(order = 1, value = "@PUBSUB_SOURCE_TEST")
+  public static void createSourcePubSubTopic() throws IOException {
+    pubSubSourceTopic = "cdf-e2e-test-" + UUID.randomUUID();
+    PubSubClient.createTopic(pubSubSourceTopic);
+    BeforeActions.scenario.write("Source PubSub topic " + pubSubSourceTopic);
+  }
+
+  @Before(order = 1, value = "@PUBSUB_SCHEMA_TEST")
+  public static void createSourcePubSubSchema() throws IOException {
+    pubSubSchemaId = "cdf-e2e-test-" + UUID.randomUUID();
+    PubSubClient.createAvroSchema(pubSubSchemaId, PluginPropertyUtils.pluginProp("avrofile"));
+    BeforeActions.scenario.write("Source Schema " + pubSubSchemaId);
+  }
+
+  @Before(order = 2, value = "@PUBSUB_SCHEMA_TOPIC_TEST")
+  public static void createSourcePubSubSchemaTopic() throws IOException, InterruptedException {
+    pubSubSourceTopic = "cdf-e2e-test-" + UUID.randomUUID();
+    PubSubClient.createTopicWithSchema(pubSubSourceTopic, pubSubSchemaId, Encoding.BINARY);
+    BeforeActions.scenario.write("Schema Topic " + pubSubSourceTopic);
+  }
+
+  @Before(order = 3, value = "@PUBSUB_SUBSCRIPTION_TEST")
+  public static void createSubscriptionPubSubTopic() throws IOException {
+    pubSubSourceSubscription = "cdf-e2e-test-" + UUID.randomUUID();
+    PubSubClient.createSubscription(pubSubSourceSubscription, pubSubSourceTopic);
+    BeforeActions.scenario.write("Source PubSub subscription " + pubSubSourceSubscription);
+  }
+
+  @After(order = 1, value = "@PUBSUB_SOURCE_TEST")
+  public static void deleteSourcePubSubTopic() {
+    try {
+      PubSubClient.deleteTopic(pubSubSourceTopic);
+      BeforeActions.scenario.write("Deleted target PubSub topic " + pubSubSourceTopic);
+      pubSubSourceTopic = StringUtils.EMPTY;
+    } catch (Exception e) {
+      if (e.getMessage().contains("Invalid resource name given") || e.getMessage().contains("Resource not found")) {
+        BeforeActions.scenario.write("Source PubSub topic " + pubSubSourceTopic + " does not exist.");
+      } else {
+        Assert.fail(e.getMessage());
+      }
+    }
+  }
+
+  @After(order = 2, value = "@PUBSUB_SCHEMA_TOPIC_TEST")
+  public static void deleteSourcePubSubSchemaTopic() {
+    try {
+      PubSubClient.deleteTopic(pubSubSourceTopic);
+      BeforeActions.scenario.write("Deleted target PubSub topic " + pubSubSourceTopic);
+      pubSubSourceTopic = StringUtils.EMPTY;
+    } catch (Exception e) {
+      if (e.getMessage().contains("Invalid resource name given") || e.getMessage().contains("Resource not found")) {
+        BeforeActions.scenario.write("Schema " + pubSubSchemaId + " does not exist.");
+      } else {
+        Assert.fail(e.getMessage());
+      }
+    }
+  }
+
   @Before(order = 1, value = "@PUBSUB_SINK_TEST")
   public static void createTargetPubSubTopic() {
     pubSubTargetTopic = "cdf-e2e-test-" + UUID.randomUUID();
     BeforeActions.scenario.write("Target PubSub topic " + pubSubTargetTopic);
+  }
+
+  @After(order = 1, value = "@PUBSUB_SCHEMA_TEST")
+  public static void deletePubSubSchema() throws IOException {
+    PubSubClient.deleteSchema(PluginPropertyUtils.pluginProp("projectId"), pubSubSchemaId);
+    BeforeActions.scenario.write("Deleted PubSub schema " + pubSubSchemaId);
+  }
+
+  @After(order = 2, value = "@PUBSUB_SUBSCRIPTION_TEST")
+  public static void deletePubSubSubscription() throws IOException {
+    PubSubClient.deleteSubscription(PluginPropertyUtils.pluginProp("projectId"), pubSubSourceSubscription);
+    BeforeActions.scenario.write("Deleted PubSub subscription " + pubSubSourceSubscription);
+  }
+
+  public static void publishMessageJsonFormat() throws IOException, InterruptedException {
+    String jsonMessage = PluginPropertyUtils.pluginProp("message");
+    String jsonMessage2 = PluginPropertyUtils.pluginProp("message2");
+    List<String> jsonMessagesList = Arrays.asList(jsonMessage, jsonMessage2);
+    PubSubClient.publishMessagesWithPubsub(PluginPropertyUtils.pluginProp("projectId"),
+                                           pubSubSourceTopic, jsonMessagesList);
+  }
+
+  public static void publishMessageAvroFormat() throws IOException, InterruptedException, ExecutionException {
+    PubSubClient.publishAvroRecords(PluginPropertyUtils.pluginProp("projectId"), pubSubSourceTopic);
+  }
+
+  public static void publishMessage() throws IOException, InterruptedException {
+    String dataMessage1 = PluginPropertyUtils.pluginProp("firstMessage");
+    String dataMessage2 = PluginPropertyUtils.pluginProp("secondMessage");
+    List<String> dataMessagesList = Arrays.asList(dataMessage1, dataMessage2);
+    PubSubClient.publishMessagesWithPubsub(PluginPropertyUtils.pluginProp
+      ("projectId"), pubSubSourceTopic, dataMessagesList);
   }
 
   @After(order = 1, value = "@PUBSUB_SINK_TEST")

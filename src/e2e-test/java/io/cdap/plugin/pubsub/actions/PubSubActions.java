@@ -20,6 +20,7 @@ import io.cdap.e2e.pages.locators.CdfStudioLocators;
 import io.cdap.e2e.utils.ElementHelper;
 import io.cdap.e2e.utils.SeleniumHelper;
 import io.cdap.plugin.pubsub.locators.PubSubLocators;
+import org.openqa.selenium.support.ui.Select;
 
 import java.util.UUID;
 
@@ -84,5 +85,10 @@ public class PubSubActions {
 
   public static void enterNumberOfReaders(String numberOfReaders) {
     ElementHelper.replaceElementValue(PubSubLocators.numberOfReaders, numberOfReaders);
+  }
+
+  public static void selectDataType() {
+    Select select = new Select(PubSubLocators.messageDataType);
+    select.selectByIndex(9);
   }
 }
