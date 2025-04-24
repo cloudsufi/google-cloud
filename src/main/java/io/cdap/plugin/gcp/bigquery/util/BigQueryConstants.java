@@ -50,4 +50,7 @@ public interface BigQueryConstants {
   String BQ_FQN_PREFIX = "bigquery";
   String CONFIG_JOB_LABEL_KEY_VALUE = "cdap.bq.sink.job.label.key.value";
   String CONFIG_BQ_HTTP_READ_TIMEOUT = "cdap.bq.job.http.read.timeout";
+  String CONFIG_INITIAL_RETRY_DURATION = "cdap.bq.serviceunavailable.retry.initialRetryDuration";
+  String CONFIG_MAX_RETRY_DURATION = "cdap.bq.serviceunavailable.retry.maxRetryDuration";
+  String CONFIG_MAX_RETRY_COUNT = "cdap.bq.serviceunavailable.retry.maxRetryCount";
 }

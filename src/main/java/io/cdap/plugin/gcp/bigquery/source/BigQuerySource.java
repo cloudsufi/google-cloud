@@ -167,6 +167,13 @@ public final class BigQuerySource extends BatchSource<LongWritable, GenericData.
     try {
       configuration = BigQueryUtil.getBigQueryConfig(serviceAccount, config.getProject(), cmekKeyName,
         config.getServiceAccountType());
+      assert config.getConnection() != null;
+      configuration.set(BigQueryConstants.CONFIG_INITIAL_RETRY_DURATION, Integer.toString(config.getConnection().
+                                                                                            getInitialRetryDuration()));
+      configuration.set(BigQueryConstants.CONFIG_MAX_RETRY_DURATION, Integer.toString(config.getConnection().
+                                                                                        getMaxRetryDuration()));
+      configuration.set(BigQueryConstants.CONFIG_MAX_RETRY_COUNT, Integer.toString(config.getConnection().
+                                                                                     getMaxRetryCount()));
     } catch (Exception e) {
       String errorReason = "Failed to create BigQuery configuration.";
       collector.addFailure(String.format("%s %s", errorReason, e.getMessage()), null)

@@ -334,7 +334,7 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
   }
 
     private BigQuerySourceConfig(@Nullable BigQueryConnectorConfig connection, @Nullable String dataset,
-                                @Nullable String cmekKey, @Nullable String bucket, @Nullable String table) {
+                               @Nullable String cmekKey, @Nullable String bucket, @Nullable String table) {
       super(connection, dataset, cmekKey, bucket);
       this.table = table;
     }
@@ -352,6 +352,10 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
     private String cmekKey;
     private String bucket;
     private String table;
+    private Integer initialRetryDuration;
+    private Integer maxRetryDuration;
+    private Integer maxRetryCount;
+
 
     public Builder setConnection(@Nullable BigQueryConnectorConfig connection) {
       this.connection = connection;
@@ -375,6 +379,21 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
 
     public Builder setBucket(@Nullable String bucket) {
       this.bucket = bucket;
+      return this;
+    }
+
+    public Builder setInitialRetryDuration(@Nullable Integer initialRetryDuration) {
+      this.initialRetryDuration = initialRetryDuration;
+      return this;
+    }
+
+    public Builder setMaxRetryDuration(@Nullable Integer maxRetryDuration) {
+      this.maxRetryDuration = maxRetryDuration;
+      return this;
+    }
+
+    public Builder setMaxRetryCount(@Nullable Integer maxRetryCount) {
+      this.maxRetryCount = maxRetryCount;
       return this;
     }
 

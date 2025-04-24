@@ -98,6 +98,12 @@ public abstract class AbstractBigQuerySink extends BatchSink<StructuredRecord, S
     CryptoKeyName cmekKeyName = CmekUtils.getCmekKey(config.cmekKey, context.getArguments().asMap(), collector);
     collector.getOrThrowException();
     baseConfiguration = getBaseConfiguration(cmekKeyName);
+    baseConfiguration.set(BigQueryConstants.CONFIG_INITIAL_RETRY_DURATION, Integer.toString(config.getConnection().
+                                                                                           getInitialRetryDuration()));
+    baseConfiguration.set(BigQueryConstants.CONFIG_MAX_RETRY_DURATION, Integer.toString(config.getConnection().
+                                                                                          getMaxRetryDuration()));
+    baseConfiguration.set(BigQueryConstants.CONFIG_MAX_RETRY_COUNT, Integer.toString(config.getConnection().
+                                                                                       getMaxRetryCount()));
 
     // Get required dataset ID and dataset instance (if it exists)
     DatasetId datasetId = DatasetId.of(config.getDatasetProject(), config.getDataset());

@@ -36,8 +36,10 @@ public class BigQueryConnectorSpecificConfig extends BigQueryConnectorConfig {
   public BigQueryConnectorSpecificConfig(@Nullable String project, @Nullable String datasetProject,
                                          @Nullable String serviceAccountType, @Nullable String serviceFilePath,
                                          @Nullable String serviceAccountJson,
-                                         @Nullable String rootDataset) {
-    super(project, datasetProject, serviceAccountType, serviceFilePath, serviceAccountJson);
+                                         @Nullable String rootDataset,  @Nullable Integer initialRetryDuration,
+                                         @Nullable Integer maxRetryDuration, @Nullable Integer maxRetryCount) {
+    super(project, datasetProject, serviceAccountType, serviceFilePath, serviceAccountJson, initialRetryDuration,
+          maxRetryDuration, maxRetryCount);
     this.rootDataset = rootDataset;
     this.showHiddenDatasets = false;
   }

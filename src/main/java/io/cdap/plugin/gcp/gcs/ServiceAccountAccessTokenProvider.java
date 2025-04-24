@@ -21,14 +21,23 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.bigtable.repackaged.com.google.gson.Gson;
 import com.google.cloud.hadoop.util.AccessTokenProvider;
 import com.google.cloud.hadoop.util.CredentialFactory;
+import dev.failsafe.Failsafe;
+import dev.failsafe.RetryPolicy;
 import io.cdap.cdap.api.exception.ErrorCategory;
 import io.cdap.cdap.api.exception.ErrorCategory.ErrorCategoryEnum;
 import io.cdap.cdap.api.exception.ErrorType;
 import io.cdap.cdap.api.exception.ErrorUtils;
+import io.cdap.plugin.gcp.bigquery.source.BigQuerySourceConfig;
+import io.cdap.plugin.gcp.bigquery.util.BigQueryConstants;
 import io.cdap.plugin.gcp.common.GCPUtils;
+import io.cdap.plugin.gcp.common.ServerErrorException;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -43,19 +52,79 @@ public class ServiceAccountAccessTokenProvider implements AccessTokenProvider {
   private Configuration conf;
   private GoogleCredentials credentials;
   private static final Gson GSON = new Gson();
+  private static final Logger logger = LoggerFactory.getLogger(ServiceAccountAccessTokenProvider.class);
+  public static final int DEFAULT_INITIAL_RETRY_DURATION_SECONDS = 5;
+  public static final int DEFAULT_MAX_RETRY_COUNT = 5;
+  public static final int DEFAULT_MAX_RETRY_DURATION_SECONDS = 80;
+
 
   @Override
   public AccessToken getAccessToken() {
-    try {
-      com.google.auth.oauth2.AccessToken token = getCredentials().getAccessToken();
-      if (token == null || token.getExpirationTime().before(Date.from(Instant.now()))) {
-        refresh();
-        token = getCredentials().getAccessToken();
+    int initialRetryDuration;
+    int maxRetryCount;
+    int maxRetryDuration;
+    if (conf != null && conf.get(BigQueryConstants.CONFIG_INITIAL_RETRY_DURATION) != null) {
+       initialRetryDuration = Integer.parseInt(conf.get(BigQueryConstants.CONFIG_INITIAL_RETRY_DURATION));
+       maxRetryCount = Integer.parseInt(conf.get(BigQueryConstants.CONFIG_MAX_RETRY_COUNT));
+       maxRetryDuration = Integer.parseInt(conf.get(BigQueryConstants.CONFIG_MAX_RETRY_DURATION));
+    } else {
+       initialRetryDuration = DEFAULT_INITIAL_RETRY_DURATION_SECONDS;
+       maxRetryCount = DEFAULT_MAX_RETRY_COUNT;
+       maxRetryDuration = DEFAULT_MAX_RETRY_DURATION_SECONDS;
+    }
+      logger.debug(
+        "Initializing RetryPolicy with the following configuration: MaxRetryCount: {}, InitialRetryDuration: {}s, " +
+          "MaxRetryDuration: {}s", maxRetryCount, initialRetryDuration, maxRetryDuration);
+      try {
+        return Failsafe.with(getRetryPolicy(initialRetryDuration, maxRetryDuration, maxRetryCount))
+          .get(() -> {
+            com.google.auth.oauth2.AccessToken token = safeGetAccessToken();
+            if (token == null || token.getExpirationTime().before(Date.from(Instant.now()))) {
+              refresh();
+              token = safeGetAccessToken();
+            }
+            return new AccessToken(token.getTokenValue(), token.getExpirationTime().getTime());
+          });
+      } catch (Exception e) {
+        throw ErrorUtils.getProgramFailureException(
+          new ErrorCategory(ErrorCategoryEnum.PLUGIN),
+          "Unable to get service account access token after retries.",
+          e.getMessage(),
+          ErrorType.UNKNOWN,
+          true,
+          e
+        );
       }
-      return new AccessToken(token.getTokenValue(), token.getExpirationTime().getTime());
+    }
+
+
+  private RetryPolicy<Object> getRetryPolicy(int initialRetryDuration, int maxRetryDuration,
+                                             int maxRetryCount) {
+    return RetryPolicy.builder()
+      .handle(ServerErrorException.class)
+      .withBackoff(Duration.ofSeconds(initialRetryDuration), Duration.ofSeconds(maxRetryDuration))
+      .withMaxRetries(maxRetryCount)
+      .onRetry(event -> logger.debug("Retry attempt {} due to {}", event.getAttemptCount(), event.getLastException().
+        getMessage()))
+      .onSuccess(event -> logger.debug("Access Token Fetched Successfully ."))
+      .onRetriesExceeded(event -> logger.error("Retry limit reached for Service account."))
+      .build();
+  }
+
+  private boolean isServerError(IOException e) {
+    String msg = e.getMessage();
+    return msg != null && msg.matches("^5\\d{2}$"); // crude check for 5xx codes
+  }
+
+  private com.google.auth.oauth2.AccessToken safeGetAccessToken() throws IOException {
+    try {
+      return getCredentials().getAccessToken();
     } catch (IOException e) {
-      throw ErrorUtils.getProgramFailureException(new ErrorCategory(ErrorCategoryEnum.PLUGIN),
-        "Unable to get service account access token.", e.getMessage(), ErrorType.UNKNOWN, true, e);
+      if (isServerError(e)) {
+        throw new ServerErrorException(HttpStatus.SC_SERVICE_UNAVAILABLE, "Server error while fetching access token: "
+          + e.getMessage());
+      }
+      throw e;
     }
   }
 
@@ -64,6 +133,10 @@ public class ServiceAccountAccessTokenProvider implements AccessTokenProvider {
     try {
       getCredentials().refresh();
     } catch (IOException e) {
+      if (isServerError(e)) {
+        throw new ServerErrorException(HttpStatus.SC_SERVICE_UNAVAILABLE, "Server error during refresh: " +
+          e.getMessage());
+      }
       throw ErrorUtils.getProgramFailureException(new ErrorCategory(ErrorCategoryEnum.PLUGIN),
         "Unable to refresh service account access token.", e.getMessage(),
         ErrorType.UNKNOWN, true, e);

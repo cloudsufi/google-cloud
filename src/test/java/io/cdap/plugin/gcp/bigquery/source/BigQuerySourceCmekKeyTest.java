@@ -124,7 +124,7 @@ public class BigQuerySourceCmekKeyTest {
   public void testServiceAccountPath() throws Exception {
     BigQueryConnectorConfig connection = new
       BigQueryConnectorConfig(project, null, GCPConnectorConfig.SERVICE_ACCOUNT_FILE_PATH,
-                              serviceAccountFilePath, null);
+                              serviceAccountFilePath, null, null, null, null);
     BigQuerySourceConfig.Builder builder = getBuilder().setConnection(connection);
     testValidCmekKey(builder);
     testInvalidCmekKeyName(builder);
@@ -136,7 +136,7 @@ public class BigQuerySourceCmekKeyTest {
   public void testServiceAccountJson() throws Exception {
     BigQueryConnectorConfig connection = new
       BigQueryConnectorConfig(project, null, GCPConnectorConfig.SERVICE_ACCOUNT_JSON,
-                              null, serviceAccountKey);
+                              null, serviceAccountKey, null, null, null);
     BigQuerySourceConfig.Builder builder = getBuilder().setConnection(connection);
     testValidCmekKey(builder);
     testInvalidCmekKeyName(builder);

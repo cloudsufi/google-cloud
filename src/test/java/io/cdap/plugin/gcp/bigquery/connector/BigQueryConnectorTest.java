@@ -132,7 +132,8 @@ public class BigQueryConnectorTest {
   @Test
   public void testServiceAccountPath() throws IOException {
     BigQueryConnectorConfig config =
-      new BigQueryConnectorConfig(project, datasetProject, null, testEnvironment.getServiceAccountFilePath(), null);
+      new BigQueryConnectorConfig(project, datasetProject, null, testEnvironment.getServiceAccountFilePath(),
+                                  null, null, null, null);
     test(config);
   }
 
@@ -142,14 +143,14 @@ public class BigQueryConnectorTest {
 
     BigQueryConnectorConfig config =
       new BigQueryConnectorConfig(project, datasetProject, BigQueryConnectorConfig.SERVICE_ACCOUNT_JSON, null,
-                                  testEnvironment.getServiceAccountContent());
+                                  testEnvironment.getServiceAccountContent(), null, null, null);
     test(config);
   }
 
   private void test(BigQueryConnectorConfig config) throws IOException {
     BigQueryConnector connector = new BigQueryConnector(new BigQueryConnectorSpecificConfig(
       config.getProject(), config.getDatasetProject(), config.getServiceAccountType(),
-      config.getServiceAccountFilePath(), config.getServiceAccountJson(), null));
+      config.getServiceAccountFilePath(), config.getServiceAccountJson(), null, null, null, null));
     testTest(connector);
     testBrowse(connector);
     testSample(connector);

@@ -199,9 +199,11 @@ public final class BigQuerySinkConfig extends AbstractBigQuerySinkConfig {
                              @Nullable String serviceAccountJson,
                              @Nullable String dataset, @Nullable String table, @Nullable String location,
                              @Nullable String cmekKey, @Nullable String bucket, @Nullable String jobLabelKeyValue,
-                             @Nullable String timePartitioningType) {
+                             @Nullable String timePartitioningType,  @Nullable Integer initialRetryDuration,
+                             @Nullable Integer maxRetryDuration, @Nullable Integer maxRetryCount) {
     super(new BigQueryConnectorConfig(project, project, serviceAccountType,
-            serviceFilePath, serviceAccountJson), dataset, cmekKey, bucket);
+    serviceFilePath, serviceAccountJson, initialRetryDuration, maxRetryDuration, maxRetryCount),
+          dataset, cmekKey, bucket);
     this.referenceName = referenceName;
     this.table = table;
     this.location = location;
@@ -734,6 +736,9 @@ public final class BigQuerySinkConfig extends AbstractBigQuerySinkConfig {
     private String bucket;
     private String jobLabelKeyValue;
     private String timePartitioningType;
+    private Integer initialRetryDuration;
+    private Integer maxRetryDuration;
+    private Integer maxRetryCount;
 
     public BigQuerySinkConfig.Builder setReferenceName(@Nullable String referenceName) {
       this.referenceName = referenceName;
@@ -794,6 +799,21 @@ public final class BigQuerySinkConfig extends AbstractBigQuerySinkConfig {
       return this;
     }
 
+    public BigQuerySinkConfig.Builder setInitialRetryDuration(@Nullable Integer initialRetryDuration) {
+      this.initialRetryDuration = initialRetryDuration;
+      return this;
+    }
+
+    public BigQuerySinkConfig.Builder setMaxRetryDuration(@Nullable Integer maxRetryDuration) {
+      this.maxRetryDuration = maxRetryDuration;
+      return this;
+    }
+
+    public BigQuerySinkConfig.Builder setMaxRetryCount(@Nullable Integer maxRetryCount) {
+      this.maxRetryCount = maxRetryCount;
+      return this;
+    }
+
     public BigQuerySinkConfig build() {
       return new BigQuerySinkConfig(
         referenceName,
@@ -807,9 +827,10 @@ public final class BigQuerySinkConfig extends AbstractBigQuerySinkConfig {
         cmekKey,
         bucket,
         jobLabelKeyValue,
-          timePartitioningType
+        timePartitioningType,
+        initialRetryDuration,
+        maxRetryDuration, maxRetryCount
       );
     }
-
   }
 }
