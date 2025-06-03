@@ -31,9 +31,10 @@ public class ServerErrorException extends RuntimeException {
    *
    * @param statusCode the HTTP status code (should be in the 5xx range)
    * @param message    the detail message explaining the error
+   * @param cause      the original cause of the error
    */
-  public ServerErrorException(int statusCode, String message) {
-    super("Server error [" + statusCode + "]: " + message);
+  public ServerErrorException(int statusCode, String message, Throwable cause) {
+    super("Server error [" + statusCode + "]: " + message, cause);
     this.statusCode = statusCode;
   }
 
