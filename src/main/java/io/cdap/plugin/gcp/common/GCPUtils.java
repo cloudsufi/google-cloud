@@ -90,7 +90,7 @@ public class GCPUtils {
   public static final int BQ_DEFAULT_READ_TIMEOUT_SECONDS = 120;
   public static final String DATASTORE_SUPPORTED_DOC_URL = "https://cloud.google.com/datastore/docs/concepts/errors";
   public static final String BIG_TABLE_SUPPORTED_DOC_URL = "https://cloud.google.com/bigtable/docs/status-codes";
-  public static final String SERVER_ERROR_SUPPORTED_DOC_URL =
+  public static final String GCE_METADATA_SERVER_ERROR_SUPPORTED_DOC_URL =
     "https://cloud.google.com/compute/docs/troubleshooting/troubleshoot-metadata-server";
 
   /**

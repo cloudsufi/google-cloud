@@ -24,10 +24,7 @@ import com.google.cloud.hadoop.util.CredentialFactory;
 import dev.failsafe.Failsafe;
 import dev.failsafe.FailsafeException;
 import dev.failsafe.RetryPolicy;
-import io.cdap.cdap.api.exception.ErrorCategory;
-import io.cdap.cdap.api.exception.ErrorCategory.ErrorCategoryEnum;
 import io.cdap.cdap.api.exception.ErrorType;
-import io.cdap.cdap.api.exception.ErrorUtils;
 import io.cdap.plugin.gcp.common.GCPErrorDetailsProviderUtil;
 import io.cdap.plugin.gcp.common.GCPUtils;
 import io.cdap.plugin.gcp.common.ServerErrorException;
@@ -40,6 +37,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,19 +55,16 @@ public class ServiceAccountAccessTokenProvider implements AccessTokenProvider {
   public static final int DEFAULT_MAX_RETRY_COUNT = 5;
   public static final int DEFAULT_MAX_RETRY_DURATION_SECONDS = 80;
   private static final RetryPolicy<Object> RETRY_POLICY = createRetryPolicy();
+  private static final Pattern SERVER_ERROR_PATTERN = Pattern.compile(".*5\\d{2}.*");
 
   @Override
   public AccessToken getAccessToken() {
-      LOG.debug(
-        "Initializing RetryPolicy with the following configuration: MaxRetryCount: {}, InitialRetryDuration: {}s, " +
-          "MaxRetryDuration: {}s", DEFAULT_MAX_RETRY_COUNT, DEFAULT_INITIAL_RETRY_DURATION_SECONDS,
-        DEFAULT_MAX_RETRY_DURATION_SECONDS);
       try {
         return Failsafe.with(RETRY_POLICY).get(() -> {
-            com.google.auth.oauth2.AccessToken token = safeGetAccessToken();
+            com.google.auth.oauth2.AccessToken token = retrieveAccessToken();
             if (token == null || token.getExpirationTime().before(Date.from(Instant.now()))) {
               refresh();
-              token = safeGetAccessToken();
+              token = retrieveAccessToken();
             }
             return new AccessToken(token.getTokenValue(), token.getExpirationTime().getTime());
           });
@@ -78,7 +73,7 @@ public class ServiceAccountAccessTokenProvider implements AccessTokenProvider {
         ErrorType errorType = (t instanceof ServerErrorException) ? ErrorType.SYSTEM : ErrorType.UNKNOWN;
         throw GCPErrorDetailsProviderUtil.getHttpResponseExceptionDetailsFromChain(
           e, "Unable to get service account access token after retries.", errorType, true,
-          GCPUtils.SERVER_ERROR_SUPPORTED_DOC_URL
+          GCPUtils.GCE_METADATA_SERVER_ERROR_SUPPORTED_DOC_URL
         );
       }
     }
@@ -98,10 +93,10 @@ public class ServiceAccountAccessTokenProvider implements AccessTokenProvider {
 
   private boolean isServerError(IOException e) {
     String msg = e.getMessage();
-    return msg != null && msg.matches("^5\\d{2}$"); // crude check for 5xx codes
+    return msg != null && SERVER_ERROR_PATTERN.matcher(msg).matches();
   }
 
-  private com.google.auth.oauth2.AccessToken safeGetAccessToken() throws IOException {
+  private com.google.auth.oauth2.AccessToken retrieveAccessToken() throws IOException {
     try {
       return getCredentials().getAccessToken();
     } catch (IOException e) {
@@ -115,17 +110,19 @@ public class ServiceAccountAccessTokenProvider implements AccessTokenProvider {
 
   @Override
   public void refresh() throws IOException {
-    try {
-      getCredentials().refresh();
-    } catch (IOException e) {
-      if (isServerError(e)) {
-        throw new ServerErrorException(HttpStatus.SC_SERVICE_UNAVAILABLE, "Server error during refresh: " +
-          e.getMessage(), e);
+    Failsafe.with(RETRY_POLICY).run(() -> {
+      try {
+        getCredentials().refresh();
+      } catch (IOException e) {
+        if (isServerError(e)) {
+          throw new ServerErrorException(HttpStatus.SC_SERVICE_UNAVAILABLE,
+                                         "Server error during refresh: " + e.getMessage(), e);
+        }
+        throw GCPErrorDetailsProviderUtil.getHttpResponseExceptionDetailsFromChain(
+          e, "Unable to refresh service account access token.", ErrorType.UNKNOWN, true,
+          GCPUtils.GCE_METADATA_SERVER_ERROR_SUPPORTED_DOC_URL);
       }
-      throw GCPErrorDetailsProviderUtil.getHttpResponseExceptionDetailsFromChain(
-        e, "Unable to refresh service account access token.", ErrorType.UNKNOWN, true,
-        GCPUtils.SERVER_ERROR_SUPPORTED_DOC_URL);
-    }
+    });
   }
 
   private GoogleCredentials getCredentials() throws IOException {
