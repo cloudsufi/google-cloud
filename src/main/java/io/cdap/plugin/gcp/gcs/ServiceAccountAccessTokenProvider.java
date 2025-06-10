@@ -110,19 +110,25 @@ public class ServiceAccountAccessTokenProvider implements AccessTokenProvider {
 
   @Override
   public void refresh() throws IOException {
-    Failsafe.with(RETRY_POLICY).run(() -> {
-      try {
-        getCredentials().refresh();
-      } catch (IOException e) {
-        if (isServerError(e)) {
-          throw new ServerErrorException(HttpStatus.SC_SERVICE_UNAVAILABLE,
-                                         "Server error during refresh: " + e.getMessage(), e);
+    try {
+      Failsafe.with(RETRY_POLICY).run(() -> {
+        try {
+          getCredentials().refresh();
+        } catch (IOException e) {
+          if (isServerError(e)) {
+            throw new ServerErrorException(HttpStatus.SC_SERVICE_UNAVAILABLE,
+                                           "Server error during refresh: " + e.getMessage(), e);
+          }
+          throw e;
         }
-        throw GCPErrorDetailsProviderUtil.getHttpResponseExceptionDetailsFromChain(
-          e, "Unable to refresh service account access token.", ErrorType.UNKNOWN, true,
-          GCPUtils.GCE_METADATA_SERVER_ERROR_SUPPORTED_DOC_URL);
-      }
-    });
+      });
+    } catch (FailsafeException e) {
+      Throwable t = e.getCause() != null ? e.getCause() : e;
+      ErrorType errorType = (t instanceof ServerErrorException) ? ErrorType.SYSTEM : ErrorType.UNKNOWN;
+      throw GCPErrorDetailsProviderUtil.getHttpResponseExceptionDetailsFromChain(
+        e, "Unable to refresh service account access token.", errorType, true,
+        GCPUtils.GCE_METADATA_SERVER_ERROR_SUPPORTED_DOC_URL);
+    }
   }
 
   private GoogleCredentials getCredentials() throws IOException {
