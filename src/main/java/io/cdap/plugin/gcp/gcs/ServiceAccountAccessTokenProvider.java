@@ -55,7 +55,8 @@ public class ServiceAccountAccessTokenProvider implements AccessTokenProvider {
   public static final int DEFAULT_MAX_RETRY_COUNT = 5;
   public static final int DEFAULT_MAX_RETRY_DURATION_SECONDS = 80;
   private static final RetryPolicy<Object> RETRY_POLICY = createRetryPolicy();
-  private static final Pattern SERVER_ERROR_PATTERN = Pattern.compile(".*5\\d{2}.*");
+  private static final Pattern SERVER_ERROR_PATTERN = Pattern.compile("Unexpected Error code 5\\d{2} trying to get " +
+  "security access token from Compute Engine metadata for the default service account.*");
 
   @Override
   public AccessToken getAccessToken() {
