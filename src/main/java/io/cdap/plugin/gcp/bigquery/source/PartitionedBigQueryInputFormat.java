@@ -20,8 +20,12 @@ import com.google.api.services.bigquery.model.Job;
 import com.google.api.services.bigquery.model.JobConfiguration;
 import com.google.api.services.bigquery.model.JobConfigurationQuery;
 import com.google.api.services.bigquery.model.JobReference;
+import com.google.api.services.bigquery.model.QueryParameter;
+import com.google.api.services.bigquery.model.QueryParameterType;
+import com.google.api.services.bigquery.model.QueryParameterValue;
 import com.google.api.services.bigquery.model.Table;
 import com.google.api.services.bigquery.model.TableReference;
+import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.StandardTableDefinition;
 import com.google.cloud.bigquery.TableDefinition.Type;
 import com.google.cloud.bigquery.TimePartitioning;
@@ -40,6 +44,7 @@ import com.google.common.base.Strings;
 import io.cdap.cdap.api.exception.ErrorCategory;
 import io.cdap.cdap.api.exception.ErrorType;
 import io.cdap.cdap.api.exception.ErrorUtils;
+import io.cdap.plugin.common.ConfigUtil;
 import io.cdap.plugin.gcp.bigquery.util.BigQueryConstants;
 import io.cdap.plugin.gcp.bigquery.util.BigQueryUtil;
 import io.cdap.plugin.gcp.common.GCPUtils;
@@ -134,6 +139,7 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
     String filter = configuration.get(BigQueryConstants.CONFIG_FILTER, null);
     Integer readTimeout = configuration.getInt(BigQueryConstants.CONFIG_BQ_HTTP_READ_TIMEOUT,
         GCPUtils.BQ_DEFAULT_READ_TIMEOUT_SECONDS);
+    String parameterMap = configuration.get(BigQueryConstants.CONFIG_FILTER_PARAMETER_MAP, null);
 
     com.google.cloud.bigquery.Table bigQueryTable = BigQueryUtil.getBigQueryTable(
       datasetProjectId, datasetId, tableName, serviceAccount, isServiceAccountFilePath, null, readTimeout);
@@ -150,11 +156,16 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
     if (query != null) {
       TableReference sourceTable = new TableReference().setDatasetId(datasetId).setProjectId(datasetProjectId)
         .setTableId(tableName);
+      com.google.cloud.bigquery.Table bqTable = BigQueryUtil.getBigQueryTable(datasetProjectId, datasetId, tableName,
+                                                                              serviceAccount, isServiceAccountFilePath,
+                                                                              null,
+                                                                              null);
       String location = bigQueryHelper.getTable(sourceTable).getLocation();
       String temporaryTableName = configuration.get(BigQueryConstants.CONFIG_TEMPORARY_TABLE_NAME);
       TableReference exportTableReference = createExportTableReference(type, datasetProjectId, datasetId,
                                                                        temporaryTableName, configuration);
-      runQuery(configuration, bigQueryHelper, projectId, exportTableReference, query, location);
+      runQuery(configuration, bigQueryHelper, projectId, exportTableReference, query, location, bqTable,
+               parameterMap);
 
       // Default values come from BigquerySource config, and can be overridden by config.
       configuration.set(BigQueryConfiguration.INPUT_PROJECT_ID.getKey(),
@@ -244,7 +255,9 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
                                String projectId,
                                TableReference tableRef,
                                String query,
-                               String location)
+                               String location,
+                               com.google.cloud.bigquery.Table bqTable,
+                               @Nullable String parameterMapString)
     throws IOException, InterruptedException {
 
     // Create a query statement and query request object.
@@ -252,6 +265,20 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
     queryConfig.setAllowLargeResults(true);
     queryConfig.setQuery(query);
     queryConfig.setUseLegacySql(false);
+    if (!Strings.isNullOrEmpty(parameterMapString)) {
+      Map<String, String> parameterMap = ConfigUtil.parseKeyValueConfig(parameterMapString, ",", "=");
+      List<QueryParameter> queryParameters = new ArrayList<>();
+      FieldList fieldList = bqTable.getDefinition().getSchema().getFields();
+      for (String columnName : parameterMap.keySet()) {
+        String parameterType = fieldList.get(columnName).getType().name();
+        QueryParameter queryParameter = new QueryParameter().setName(columnName)
+          .setParameterType(new QueryParameterType().setType(parameterType));
+        QueryParameterValue value = new QueryParameterValue().setValue(parameterMap.get(columnName));
+        queryParameters.add(queryParameter.setParameterValue(value));
+      }
+      queryConfig.setParameterMode("NAMED");
+      queryConfig.setQueryParameters(queryParameters);
+    }
 
     // Set the table to put results into.
     queryConfig.setDestinationTable(tableRef);

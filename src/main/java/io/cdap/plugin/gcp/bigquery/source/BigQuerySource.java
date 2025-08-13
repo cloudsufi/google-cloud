@@ -261,6 +261,10 @@ public final class BigQuerySource extends BatchSource<LongWritable, GenericData.
     if (config.getFilter() != null) {
       configuration.set(BigQueryConstants.CONFIG_FILTER, config.getFilter());
     }
+    // TODO Add code of parameter map
+    if (config.getParameterMap() != null) {
+      configuration.set(BigQueryConstants.CONFIG_FILTER_PARAMETER_MAP, config.getParameterMap());
+    }
     if (config.getViewMaterializationProject() != null) {
       configuration.set(BigQueryConstants.CONFIG_VIEW_MATERIALIZATION_PROJECT, config.getViewMaterializationProject());
     }

@@ -68,6 +68,7 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
   public static final String NAME_PARTITION_FROM = "partitionFrom";
   public static final String NAME_PARTITION_TO = "partitionTo";
   public static final String NAME_FILTER = "filter";
+  public static final String NAME_FILTER_PARAMETER_MAP = "parameterMap";
   public static final String NAME_ENABLE_QUERYING_VIEWS = "enableQueryingViews";
   public static final String NAME_VIEW_MATERIALIZATION_PROJECT = "viewMaterializationProject";
   public static final String NAME_VIEW_MATERIALIZATION_DATASET = "viewMaterializationDataset";
@@ -110,6 +111,12 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
   @Description("The WHERE clause filters out rows by evaluating each row against boolean expression, " +
     "and discards all rows that do not return TRUE (that is, rows that return FALSE or NULL).")
   private String filter;
+
+  @Name(NAME_FILTER_PARAMETER_MAP)
+  @Macro
+  @Nullable
+  @Description("While using parameterized query, provide values in key-value pair ")
+  private String parameterMap;
 
   @Name(NAME_ENABLE_QUERYING_VIEWS)
   @Macro
@@ -293,6 +300,11 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
       }
     }
     return filter;
+  }
+
+  @Nullable
+  public String getParameterMap() {
+    return parameterMap;
   }
 
   public boolean isEnableQueryingViews() {
