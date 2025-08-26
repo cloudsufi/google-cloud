@@ -60,6 +60,11 @@ import org.apache.hadoop.util.Progressable;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -271,10 +276,15 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
       FieldList fieldList = bqTable.getDefinition().getSchema().getFields();
       for (String columnName : parameterMap.keySet()) {
         String parameterType = fieldList.get(columnName).getType().name();
-        QueryParameter queryParameter = new QueryParameter().setName(columnName)
-          .setParameterType(new QueryParameterType().setType(parameterType));
-        QueryParameterValue value = new QueryParameterValue().setValue(parameterMap.get(columnName));
-        queryParameters.add(queryParameter.setParameterValue(value));
+        String rawValue = parameterMap.get(columnName);
+        String normalizedValue = normalizeValueForBigQuery(parameterType, rawValue);
+
+        QueryParameter queryParameter = new QueryParameter()
+            .setName(columnName)
+            .setParameterType(new QueryParameterType().setType(parameterType))
+            .setParameterValue(new QueryParameterValue().setValue(normalizedValue));
+
+        queryParameters.add(queryParameter);
       }
       queryConfig.setParameterMode("NAMED");
       queryConfig.setQueryParameters(queryParameters);
@@ -319,6 +329,42 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
                                                       tableRef.getTableId(), table).execute();
     }
   }
+
+  private static String normalizeValueForBigQuery(String parameterType, String rawValue) {
+    try {
+      switch (parameterType) {
+        case "DATE":
+          LocalDate date = LocalDate.parse(rawValue,
+              DateTimeFormatter.ofPattern("[yyyy-MM-dd][MM/dd/yyyy][dd-MM-yyyy]"));
+          return date.toString();
+
+        case "DATETIME":
+          LocalDateTime datetime = LocalDateTime.parse(rawValue,
+              DateTimeFormatter.ofPattern("[yyyy-MM-dd HH:mm:ss][yyyy-MM-dd'T'HH:mm:ss]"));
+          return datetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        case "TIME":
+          LocalTime time = LocalTime.parse(rawValue,
+              DateTimeFormatter.ofPattern("[HH:mm:ss][HH:mm:ss.SSSSSS]"));
+          return time.toString();
+
+        case "TIMESTAMP":
+          if (rawValue.matches("\\d+")) {
+            Instant instant = Instant.ofEpochMilli(Long.parseLong(rawValue));
+            return instant.toString();
+          }
+          Instant instant = Instant.parse(rawValue.replace(" ", "T").replace("UTC", "Z"));
+          return instant.toString();
+
+        default:
+          return rawValue;
+      }
+    } catch (Exception e) {
+      throw new IllegalArgumentException(
+          String.format("Invalid value '%s' for BigQuery type %s", rawValue, parameterType), e);
+    }
+  }
+
 
   /**
    * Gets the Job Reference for the BQ job to execute.
