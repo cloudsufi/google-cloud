@@ -157,7 +157,7 @@
           "name": "parameterMap",
           "widget-attributes": {
             "delimiter": ",",
-            "values-delimiter": ":",
+            "values-delimiter": "=",
             "numValues": "3",
             "placeholders": [
               "Field Alias",

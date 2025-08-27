@@ -274,18 +274,24 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
       Map<String, String> parameterMap = ConfigUtil.parseKeyValueConfig(parameterMapString, ",", "=");
       List<QueryParameter> queryParameters = new ArrayList<>();
       FieldList fieldList = bqTable.getDefinition().getSchema().getFields();
-      for (String columnName : parameterMap.keySet()) {
+      for (String alias : parameterMap.keySet()) {
+        String raw = parameterMap.get(alias); // "sys_updated_on=2018-12-11T23"
+        String[] parts = raw.split("=", 2);   // [ "sys_updated_on", "2018-12-11T23" ]
+
+        String columnName = parts[0];
+        String rawValue   = parts[1];
+
         String parameterType = fieldList.get(columnName).getType().name();
-        String rawValue = parameterMap.get(columnName);
         String normalizedValue = normalizeValueForBigQuery(parameterType, rawValue);
 
         QueryParameter queryParameter = new QueryParameter()
-            .setName(columnName)
+            .setName(alias)
             .setParameterType(new QueryParameterType().setType(parameterType))
             .setParameterValue(new QueryParameterValue().setValue(normalizedValue));
 
         queryParameters.add(queryParameter);
       }
+
       queryConfig.setParameterMode("NAMED");
       queryConfig.setQueryParameters(queryParameters);
     }
