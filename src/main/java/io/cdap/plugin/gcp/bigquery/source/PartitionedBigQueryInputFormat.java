@@ -58,6 +58,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.Progressable;
 
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
@@ -66,6 +67,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -271,16 +273,30 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
     queryConfig.setQuery(query);
     queryConfig.setUseLegacySql(false);
     if (!Strings.isNullOrEmpty(parameterMapString)) {
-      Map<String, String> parameterMap = ConfigUtil.parseKeyValueConfig(parameterMapString, ",", "=");
+      Map<String, String> parameterMap = new LinkedHashMap<>();
+      for (String entry : parameterMapString.split(",")) {
+        int idx = entry.indexOf('=');
+        if (idx < 0) {
+          throw new IllegalArgumentException("Invalid entry: " + entry + ". Expected format alias=column=value");
+        }
+        String alias = entry.substring(0, idx);
+        String colAndVal = entry.substring(idx + 1);
+        parameterMap.put(alias, colAndVal);
+      }
+
       List<QueryParameter> queryParameters = new ArrayList<>();
       FieldList fieldList = bqTable.getDefinition().getSchema().getFields();
       for (String alias : parameterMap.keySet()) {
         String raw = parameterMap.get(alias); // "sys_updated_on=2018-12-11T23"
-        String[] parts = raw.split("=", 2);   // [ "sys_updated_on", "2018-12-11T23" ]
+        String[] parts = raw.split("=", 2);
+        if (parts.length < 2) {
+          throw new IllegalArgumentException(
+              String.format("Invalid parameter entry for alias '%s': '%s'. Expected format 'column=value'.",
+                  alias, raw));
+        }
 
         String columnName = parts[0];
         String rawValue   = parts[1];
-
         String parameterType = fieldList.get(columnName).getType().name();
         String normalizedValue = normalizeValueForBigQuery(parameterType, rawValue);
 
@@ -341,12 +357,19 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
       switch (parameterType) {
         case "DATE":
           LocalDate date = LocalDate.parse(rawValue,
-              DateTimeFormatter.ofPattern("[yyyy-MM-dd][MM/dd/yyyy][dd-MM-yyyy]"));
+              DateTimeFormatter.ofPattern("[yyyy-MM-dd][MM/dd/yyyy][dd-MM-yyyy][yyyy/MM/dd]"));
           return date.toString();
 
         case "DATETIME":
           LocalDateTime datetime = LocalDateTime.parse(rawValue,
-              DateTimeFormatter.ofPattern("[yyyy-MM-dd HH:mm:ss][yyyy-MM-dd'T'HH:mm:ss]"));
+              DateTimeFormatter.ofPattern(
+                  "[yyyy-MM-dd HH:mm:ss][yyyy-MM-dd'T'HH:mm:ss]" +
+                      "[yyyy/MM/dd HH:mm:ss][yyyy/MM/dd]" +
+                      "[MM/dd/yyyy HH:mm:ss][MM/dd/yyyy]" +
+                      "[dd-MM-yyyy HH:mm:ss][dd-MM-yyyy]"));
+          if (datetime.toLocalTime().equals(LocalTime.MIDNIGHT) && rawValue.length() <= 10) {
+            datetime = datetime.withHour(0).withMinute(0).withSecond(0);
+          }
           return datetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         case "TIME":
