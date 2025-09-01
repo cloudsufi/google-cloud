@@ -36,6 +36,8 @@ public interface BigQueryConstants {
   String CONFIG_TABLE_FIELDS = "cdap.bq.sink.table.fields";
   String CONFIG_JSON_STRING_FIELDS = "cdap.bq.sink.json.string.fields";
   String CONFIG_FILTER = "cdap.bq.source.filter";
+
+  String CONFIG_FILTER_PARAMETER_MAP = "cdap.bq.source.filter.parameter.map";
   String CONFIG_PARTITION_FILTER = "cdap.bq.sink.partition.filter";
   String CONFIG_JOB_ID = "cdap.bq.sink.job.id";
   String CONFIG_VIEW_MATERIALIZATION_PROJECT = "cdap.bq.source.view.materialization.project";
@@ -50,4 +52,7 @@ public interface BigQueryConstants {
   String BQ_FQN_PREFIX = "bigquery";
   String CONFIG_JOB_LABEL_KEY_VALUE = "cdap.bq.sink.job.label.key.value";
   String CONFIG_BQ_HTTP_READ_TIMEOUT = "cdap.bq.job.http.read.timeout";
+
+  String CONFIG_ENABLE_PARAMETERIZED_QUERY = "bigquery.enable.parameterized.query";
+
 }

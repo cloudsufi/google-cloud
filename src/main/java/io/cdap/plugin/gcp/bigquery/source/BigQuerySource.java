@@ -261,6 +261,10 @@ public final class BigQuerySource extends BatchSource<LongWritable, GenericData.
     if (config.getFilter() != null) {
       configuration.set(BigQueryConstants.CONFIG_FILTER, config.getFilter());
     }
+    // TODO Add code of parameter map
+    if (config.getParameterMap() != null) {
+      configuration.set(BigQueryConstants.CONFIG_FILTER_PARAMETER_MAP, config.getParameterMap());
+    }
     if (config.getViewMaterializationProject() != null) {
       configuration.set(BigQueryConstants.CONFIG_VIEW_MATERIALIZATION_PROJECT, config.getViewMaterializationProject());
     }
@@ -268,6 +272,8 @@ public final class BigQuerySource extends BatchSource<LongWritable, GenericData.
       configuration.set(BigQueryConstants.CONFIG_VIEW_MATERIALIZATION_DATASET, config.getViewMaterializationDataset());
     }
     configuration.set(BigQueryConstants.CONFIG_BQ_HTTP_READ_TIMEOUT, String.valueOf(config.getReadTimeout()));
+    configuration.setBoolean(BigQueryConstants.CONFIG_ENABLE_PARAMETERIZED_QUERY,
+        config.isEnableParameterizedQuery());
   }
 
   public Schema getSchema(FailureCollector collector) {

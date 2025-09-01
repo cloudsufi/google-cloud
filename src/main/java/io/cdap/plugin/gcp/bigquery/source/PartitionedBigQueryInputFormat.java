@@ -20,8 +20,12 @@ import com.google.api.services.bigquery.model.Job;
 import com.google.api.services.bigquery.model.JobConfiguration;
 import com.google.api.services.bigquery.model.JobConfigurationQuery;
 import com.google.api.services.bigquery.model.JobReference;
+import com.google.api.services.bigquery.model.QueryParameter;
+import com.google.api.services.bigquery.model.QueryParameterType;
+import com.google.api.services.bigquery.model.QueryParameterValue;
 import com.google.api.services.bigquery.model.Table;
 import com.google.api.services.bigquery.model.TableReference;
+import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.StandardTableDefinition;
 import com.google.cloud.bigquery.TableDefinition.Type;
 import com.google.cloud.bigquery.TimePartitioning;
@@ -40,6 +44,7 @@ import com.google.common.base.Strings;
 import io.cdap.cdap.api.exception.ErrorCategory;
 import io.cdap.cdap.api.exception.ErrorType;
 import io.cdap.cdap.api.exception.ErrorUtils;
+import io.cdap.plugin.common.ConfigUtil;
 import io.cdap.plugin.gcp.bigquery.util.BigQueryConstants;
 import io.cdap.plugin.gcp.bigquery.util.BigQueryUtil;
 import io.cdap.plugin.gcp.common.GCPUtils;
@@ -53,9 +58,16 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.Progressable;
 
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -134,6 +146,7 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
     String filter = configuration.get(BigQueryConstants.CONFIG_FILTER, null);
     Integer readTimeout = configuration.getInt(BigQueryConstants.CONFIG_BQ_HTTP_READ_TIMEOUT,
         GCPUtils.BQ_DEFAULT_READ_TIMEOUT_SECONDS);
+    String parameterMap = configuration.get(BigQueryConstants.CONFIG_FILTER_PARAMETER_MAP, null);
 
     com.google.cloud.bigquery.Table bigQueryTable = BigQueryUtil.getBigQueryTable(
       datasetProjectId, datasetId, tableName, serviceAccount, isServiceAccountFilePath, null, readTimeout);
@@ -150,11 +163,16 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
     if (query != null) {
       TableReference sourceTable = new TableReference().setDatasetId(datasetId).setProjectId(datasetProjectId)
         .setTableId(tableName);
+      com.google.cloud.bigquery.Table bqTable = BigQueryUtil.getBigQueryTable(datasetProjectId, datasetId, tableName,
+                                                                              serviceAccount, isServiceAccountFilePath,
+                                                                              null,
+                                                                              null);
       String location = bigQueryHelper.getTable(sourceTable).getLocation();
       String temporaryTableName = configuration.get(BigQueryConstants.CONFIG_TEMPORARY_TABLE_NAME);
       TableReference exportTableReference = createExportTableReference(type, datasetProjectId, datasetId,
                                                                        temporaryTableName, configuration);
-      runQuery(configuration, bigQueryHelper, projectId, exportTableReference, query, location);
+      runQuery(configuration, bigQueryHelper, projectId, exportTableReference, query, location, bqTable,
+               parameterMap);
 
       // Default values come from BigquerySource config, and can be overridden by config.
       configuration.set(BigQueryConfiguration.INPUT_PROJECT_ID.getKey(),
@@ -244,7 +262,9 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
                                String projectId,
                                TableReference tableRef,
                                String query,
-                               String location)
+                               String location,
+                               com.google.cloud.bigquery.Table bqTable,
+                               @Nullable String parameterMapString)
     throws IOException, InterruptedException {
 
     // Create a query statement and query request object.
@@ -252,6 +272,47 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
     queryConfig.setAllowLargeResults(true);
     queryConfig.setQuery(query);
     queryConfig.setUseLegacySql(false);
+    boolean enableParameterizedQuery =
+        configuration.getBoolean(BigQueryConstants.CONFIG_ENABLE_PARAMETERIZED_QUERY, true);
+    if (enableParameterizedQuery && !Strings.isNullOrEmpty(parameterMapString)) {
+      Map<String, String> parameterMap = new LinkedHashMap<>();
+      for (String entry : parameterMapString.split(",")) {
+        int idx = entry.indexOf('=');
+        if (idx < 0) {
+          throw new IllegalArgumentException("Invalid entry: " + entry + ". Expected format alias=column=value");
+        }
+        String alias = entry.substring(0, idx);
+        String colAndVal = entry.substring(idx + 1);
+        parameterMap.put(alias, colAndVal);
+      }
+
+      List<QueryParameter> queryParameters = new ArrayList<>();
+      FieldList fieldList = bqTable.getDefinition().getSchema().getFields();
+      for (String alias : parameterMap.keySet()) {
+        String raw = parameterMap.get(alias); // "sys_updated_on=2018-12-11T23"
+        String[] parts = raw.split("=", 2);
+        if (parts.length < 2) {
+          throw new IllegalArgumentException(
+              String.format("Invalid parameter entry for alias '%s': '%s'. Expected format 'column=value'.",
+                  alias, raw));
+        }
+
+        String columnName = parts[0];
+        String rawValue   = parts[1];
+        String parameterType = fieldList.get(columnName).getType().name();
+        String normalizedValue = normalizeValueForBigQuery(parameterType, rawValue);
+
+        QueryParameter queryParameter = new QueryParameter()
+            .setName(alias)
+            .setParameterType(new QueryParameterType().setType(parameterType))
+            .setParameterValue(new QueryParameterValue().setValue(normalizedValue));
+
+        queryParameters.add(queryParameter);
+      }
+
+      queryConfig.setParameterMode("NAMED");
+      queryConfig.setQueryParameters(queryParameters);
+    }
 
     // Set the table to put results into.
     queryConfig.setDestinationTable(tableRef);
@@ -292,6 +353,49 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
                                                       tableRef.getTableId(), table).execute();
     }
   }
+
+  private static String normalizeValueForBigQuery(String parameterType, String rawValue) {
+    try {
+      switch (parameterType) {
+        case "DATE":
+          LocalDate date = LocalDate.parse(rawValue,
+              DateTimeFormatter.ofPattern("[yyyy-MM-dd][MM/dd/yyyy][dd-MM-yyyy][yyyy/MM/dd]"));
+          return date.toString();
+
+        case "DATETIME":
+          LocalDateTime datetime = LocalDateTime.parse(rawValue,
+              DateTimeFormatter.ofPattern(
+                  "[yyyy-MM-dd HH:mm:ss][yyyy-MM-dd'T'HH:mm:ss]" +
+                      "[yyyy/MM/dd HH:mm:ss][yyyy/MM/dd]" +
+                      "[MM/dd/yyyy HH:mm:ss][MM/dd/yyyy]" +
+                      "[dd-MM-yyyy HH:mm:ss][dd-MM-yyyy]"));
+          if (datetime.toLocalTime().equals(LocalTime.MIDNIGHT) && rawValue.length() <= 10) {
+            datetime = datetime.withHour(0).withMinute(0).withSecond(0);
+          }
+          return datetime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        case "TIME":
+          LocalTime time = LocalTime.parse(rawValue,
+              DateTimeFormatter.ofPattern("[HH:mm:ss][HH:mm:ss.SSSSSS]"));
+          return time.toString();
+
+        case "TIMESTAMP":
+          if (rawValue.matches("\\d+")) {
+            Instant instant = Instant.ofEpochMilli(Long.parseLong(rawValue));
+            return instant.toString();
+          }
+          Instant instant = Instant.parse(rawValue.replace(" ", "T").replace("UTC", "Z"));
+          return instant.toString();
+
+        default:
+          return rawValue;
+      }
+    } catch (Exception e) {
+      throw new IllegalArgumentException(
+          String.format("Invalid value '%s' for BigQuery type %s", rawValue, parameterType), e);
+    }
+  }
+
 
   /**
    * Gets the Job Reference for the BQ job to execute.

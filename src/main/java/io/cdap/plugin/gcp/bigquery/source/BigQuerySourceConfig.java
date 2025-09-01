@@ -68,9 +68,12 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
   public static final String NAME_PARTITION_FROM = "partitionFrom";
   public static final String NAME_PARTITION_TO = "partitionTo";
   public static final String NAME_FILTER = "filter";
+  public static final String NAME_FILTER_PARAMETER_MAP = "parameterMap";
   public static final String NAME_ENABLE_QUERYING_VIEWS = "enableQueryingViews";
   public static final String NAME_VIEW_MATERIALIZATION_PROJECT = "viewMaterializationProject";
   public static final String NAME_VIEW_MATERIALIZATION_DATASET = "viewMaterializationDataset";
+
+  public static final String NAME_ENABLE_PARAMETERIZED_QUERY = "enableParameterizedQuery";
 
   @Name(Constants.Reference.REFERENCE_NAME)
   @Nullable
@@ -111,6 +114,12 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
     "and discards all rows that do not return TRUE (that is, rows that return FALSE or NULL).")
   private String filter;
 
+  @Name(NAME_FILTER_PARAMETER_MAP)
+  @Macro
+  @Nullable
+  @Description("While using parameterized query, provide values in key-value pair ")
+  private String parameterMap;
+
   @Name(NAME_ENABLE_QUERYING_VIEWS)
   @Macro
   @Nullable
@@ -137,6 +146,12 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
   @Macro
   @Description("Timeout in seconds to read data from an established HTTP connection (Default value is 120).")
   private Integer readTimeout;
+
+  @Name(NAME_ENABLE_PARAMETERIZED_QUERY)
+  @Nullable
+  @Macro
+  @Description("Whether to enable parameterized queries in the filter field.")
+  private Boolean enableParameterizedQuery = true;
 
   public String getTable() {
     return table;
@@ -293,6 +308,15 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
       }
     }
     return filter;
+  }
+
+  @Nullable
+  public String getParameterMap() {
+    return parameterMap;
+  }
+
+  public boolean isEnableParameterizedQuery() {
+    return enableParameterizedQuery != null && enableParameterizedQuery;
   }
 
   public boolean isEnableQueryingViews() {

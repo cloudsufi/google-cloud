@@ -152,6 +152,37 @@
           }
         },
         {
+          "widget-type": "toggle",
+          "label": "Enable Parameterized Query",
+          "name": "enableParameterizedQuery",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "True"
+            },
+            "off": {
+              "value": "false",
+              "label": "False"
+            },
+            "default": "true"
+          }
+        },
+        {
+          "widget-type": "ds-multiplevalues",
+          "label": "Parameterized Query Map",
+          "name": "parameterMap",
+          "widget-attributes": {
+            "delimiter": ",",
+            "values-delimiter": "=",
+            "numValues": "3",
+            "placeholders": [
+              "Field Alias",
+              "Field Name",
+              "Field Value"
+            ]
+          }
+        },
+        {
           "widget-type": "textbox",
           "label": "Temporary Bucket Name",
           "name": "bucket",
@@ -298,6 +329,18 @@
         {
           "type": "property",
           "name": "connection"
+        }
+      ]
+    },
+    {
+      "name": "showParameterizedQueryMap",
+      "condition": {
+        "expression": "enableParameterizedQuery == true"
+      },
+      "show": [
+        {
+          "type": "property",
+          "name": "parameterMap"
         }
       ]
     }
