@@ -152,6 +152,22 @@
           }
         },
         {
+          "widget-type": "toggle",
+          "label": "Enable Parameterized Query",
+          "name": "enableParameterizedQuery",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "True"
+            },
+            "off": {
+              "value": "false",
+              "label": "False"
+            },
+            "default": "true"
+          }
+        },
+        {
           "widget-type": "ds-multiplevalues",
           "label": "Parameterized Query Map",
           "name": "parameterMap",
@@ -313,6 +329,18 @@
         {
           "type": "property",
           "name": "connection"
+        }
+      ]
+    },
+    {
+      "name": "showParameterizedQueryMap",
+      "condition": {
+        "expression": "enableParameterizedQuery == true"
+      },
+      "show": [
+        {
+          "type": "property",
+          "name": "parameterMap"
         }
       ]
     }

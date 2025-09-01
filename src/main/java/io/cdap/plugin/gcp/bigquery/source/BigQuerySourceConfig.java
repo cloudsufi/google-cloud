@@ -73,6 +73,8 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
   public static final String NAME_VIEW_MATERIALIZATION_PROJECT = "viewMaterializationProject";
   public static final String NAME_VIEW_MATERIALIZATION_DATASET = "viewMaterializationDataset";
 
+  public static final String NAME_ENABLE_PARAMETERIZED_QUERY = "enableParameterizedQuery";
+
   @Name(Constants.Reference.REFERENCE_NAME)
   @Nullable
   @Description("This will be used to uniquely identify this source for lineage, annotating metadata, etc.")
@@ -144,6 +146,12 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
   @Macro
   @Description("Timeout in seconds to read data from an established HTTP connection (Default value is 120).")
   private Integer readTimeout;
+
+  @Name(NAME_ENABLE_PARAMETERIZED_QUERY)
+  @Nullable
+  @Macro
+  @Description("Whether to enable parameterized queries in the filter field.")
+  private Boolean enableParameterizedQuery = true;
 
   public String getTable() {
     return table;
@@ -305,6 +313,10 @@ public final class BigQuerySourceConfig extends BigQueryBaseConfig {
   @Nullable
   public String getParameterMap() {
     return parameterMap;
+  }
+
+  public boolean isEnableParameterizedQuery() {
+    return enableParameterizedQuery != null && enableParameterizedQuery;
   }
 
   public boolean isEnableQueryingViews() {

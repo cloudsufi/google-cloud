@@ -272,7 +272,9 @@ public class PartitionedBigQueryInputFormat extends AbstractBigQueryInputFormat<
     queryConfig.setAllowLargeResults(true);
     queryConfig.setQuery(query);
     queryConfig.setUseLegacySql(false);
-    if (!Strings.isNullOrEmpty(parameterMapString)) {
+    boolean enableParameterizedQuery =
+        configuration.getBoolean(BigQueryConstants.CONFIG_ENABLE_PARAMETERIZED_QUERY, true);
+    if (enableParameterizedQuery && !Strings.isNullOrEmpty(parameterMapString)) {
       Map<String, String> parameterMap = new LinkedHashMap<>();
       for (String entry : parameterMapString.split(",")) {
         int idx = entry.indexOf('=');
